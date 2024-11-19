@@ -6,9 +6,13 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
 	},
 	"devDependencies": {
+		"prettier": "^3.3.3",
+		"prettier-plugin-css-order": "^2.1.2",
 		"vite": "^5.4.10"
 	}
 }
