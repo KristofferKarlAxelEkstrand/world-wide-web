@@ -4,11 +4,9 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
-		"build": "vite build",
-		"preview": "vite preview",
-		"format": "prettier --write .",
-		"format:check": "prettier --check ."
+		"dev": "node dir.js && vite",
+		"build": "node dir.js && vite build",
+		"format": "prettier --write ."
 	},
 	"devDependencies": {
 		"prettier": "^3.3.3",
