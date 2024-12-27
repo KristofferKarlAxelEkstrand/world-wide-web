@@ -87,10 +87,7 @@ p {
 
 baseline-grid {
 	display: grid;
-	grid-template-columns: repeat(
-		auto-fill,
-		minmax(var(--grid-size), var(--grid-size))
-	);
+	grid-template-columns: repeat(auto-fill, minmax(var(--grid-size), var(--grid-size)));
 	grid-auto-rows: minmax(var(--grid-size), var(--grid-size));
 	gap: var(--grid-gap);
 }
@@ -105,8 +102,7 @@ header-bar-logo {
 
 hero-background {
 	background-image: url('img/bg.svg');
-	background-position: calc(var(--base-unit) * 0.5)
-		calc(var(--base-unit) * 0.5);
+	background-position: calc(var(--base-unit) * 0.5) calc(var(--base-unit) * 0.5);
 	background-size: var(--base-unit);
 
 	--grid-row-start: 1;

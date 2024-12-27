@@ -8,9 +8,7 @@ const outDir = resolve(__dirname, 'dist');
 
 // Function to get all directories in a given path
 function getDirectories(srcPath) {
-	return readdirSync(srcPath).filter((file) =>
-		statSync(resolve(srcPath, file)).isDirectory()
-	);
+	return readdirSync(srcPath).filter((file) => statSync(resolve(srcPath, file)).isDirectory());
 }
 
 // Generate input paths for each directory in 'src'

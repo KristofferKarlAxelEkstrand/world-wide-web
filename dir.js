@@ -24,8 +24,12 @@ const htmlContent = `
 		<title>World Wide Web Fiddle</title>
 	</head>
 	<body>
-		<ul>
-			${directories.map((dir) => `<li><a href="/${dir}/">${dir}</a></li>`).join('')}
+		<ul>${directories
+			.map(
+				(dir) => `
+			<li><a href="/${dir}/">${dir}</a></li>`
+			)
+			.join('')}
 		</ul>
 
 		<script type="module" src="/index.js"></script>

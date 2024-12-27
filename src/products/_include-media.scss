@@ -22,10 +22,8 @@ $media-expressions: (
 	'handheld': 'handheld',
 	'landscape': '(orientation: landscape)',
 	'portrait': '(orientation: portrait)',
-	'retina2x':
-		'(-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi), (min-resolution: 2dppx)',
-	'retina3x':
-		'(-webkit-min-device-pixel-ratio: 3), (min-resolution: 350dpi), (min-resolution: 3dppx)',
+	'retina2x': '(-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi), (min-resolution: 2dppx)',
+	'retina3x': '(-webkit-min-device-pixel-ratio: 3), (min-resolution: 350dpi), (min-resolution: 3dppx)',
 ) !default;
 
 $unit-intervals: (
@@ -72,9 +70,7 @@ $im-no-media-expressions: ('screen', 'portrait', 'landscape') !default;
 			$prefix: get-expression-prefix($operator);
 			$value: get-expression-value($condition, $operator);
 
-			@if ($prefix == 'max' and $value <= $no-media-breakpoint-value) or
-				($prefix == 'min' and $value > $no-media-breakpoint-value)
-			{
+			@if ($prefix == 'max' and $value <= $no-media-breakpoint-value) or ($prefix == 'min' and $value > $no-media-breakpoint-value) {
 				@return false;
 			}
 		} @else if not list.index($im-no-media-expressions, $condition) {
@@ -114,10 +110,7 @@ $im-no-media-expressions: ('screen', 'portrait', 'landscape') !default;
 
 @function get-expression-value($expression, $operator) {
 	$operator-index: string.index($expression, $operator);
-	$value: string.slice(
-		$expression,
-		$operator-index + string.length($operator)
-	);
+	$value: string.slice($expression, $operator-index + string.length($operator));
 	$trimmedValue: str-trim($value);
 
 	@if map.has-key($breakpoints, $trimmedValue) {
@@ -201,12 +194,8 @@ $im-no-media-expressions: ('screen', 'portrait', 'landscape') !default;
 	@for $i from 1 through string.length($value) {
 		$character: string.slice($value, $i, $i);
 
-		@if not(list.index(map.keys($numbers), $character) or $character == '.')
-		{
-			@return to-length(
-				if($minus, -$result, $result),
-				string.slice($value, $i)
-			);
+		@if not(list.index(map.keys($numbers), $character) or $character == '.') {
+			@return to-length(if($minus, -$result, $result), string.slice($value, $i));
 		}
 
 		@if $character == '.' {
@@ -265,10 +254,7 @@ $im-no-media-expressions: ('screen', 'portrait', 'landscape') !default;
 
 	// Update global configuration
 	$breakpoints: map.merge($breakpoints, $tweakpoints) !global;
-	$media-expressions: map.merge(
-		$media-expressions,
-		$tweak-media-expressions
-	) !global;
+	$media-expressions: map.merge($media-expressions, $tweak-media-expressions) !global;
 
 	@content;
 
@@ -278,13 +264,7 @@ $im-no-media-expressions: ('screen', 'portrait', 'landscape') !default;
 }
 
 @mixin media($conditions...) {
-	@if ($im-media-support and list.length($conditions) == 0) or
-		(
-			not
-				$im-media-support and
-				im-intercepts-static-breakpoint($conditions...)
-		)
-	{
+	@if ($im-media-support and list.length($conditions) == 0) or (not $im-media-support and im-intercepts-static-breakpoint($conditions...)) {
 		@content;
 	} @else if ($im-media-support and list.length($conditions) > 0) {
 		@media #{string.unquote(parse-expression(list.nth($conditions, 1)))} {

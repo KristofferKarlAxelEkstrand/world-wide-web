@@ -19,14 +19,8 @@ class Site {
 		const screenWidth = window.innerWidth;
 		const bodyWidth = document.body.clientWidth;
 		const scrollbarWidth = screenWidth - bodyWidth;
-		document.documentElement.style.setProperty(
-			'--scrollbar-width',
-			`${scrollbarWidth}px`
-		);
-		document.documentElement.style.setProperty(
-			'--screen-width',
-			`${bodyWidth}px`
-		);
+		document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
+		document.documentElement.style.setProperty('--screen-width', `${bodyWidth}px`);
 	}
 }
 

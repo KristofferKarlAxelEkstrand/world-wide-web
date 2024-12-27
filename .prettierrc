@@ -2,7 +2,7 @@
 	"plugins": ["prettier-plugin-css-order"],
 	"useTabs": true,
 	"tabWidth": 4,
-	"printWidth": 80,
+	"printWidth": 1000,
 	"singleQuote": true,
 	"trailingComma": "es5"
 }
