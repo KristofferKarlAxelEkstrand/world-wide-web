@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="101" height="101" xmlns="http://www.w3.org/2000/svg">
+	<line x1="51" y1="-1" x2="51" y2="102" stroke="#e0e8ed" stroke-width="3" vector-effect="non-scaling-stroke" />
+	<line x1="-2" y1="51" x2="102" y2="51" stroke="#e0e8ed" stroke-width="3" vector-effect="non-scaling-stroke" />
+</svg>

@@ -11,6 +11,7 @@
 	"devDependencies": {
 		"prettier": "^3.3.3",
 		"prettier-plugin-css-order": "^2.1.2",
-		"vite": "^5.4.10"
+		"vite": "^5.4.10",
+		"sass-embedded": "^1.0.0"
 	}
 }

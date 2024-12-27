@@ -25,7 +25,7 @@ const htmlContent = `
 	</head>
 	<body>
 		<ul>
-			${directories.map((dir) => `<li><a href="./${dir}">${dir}</a></li>`).join('')}
+			${directories.map((dir) => `<li><a href="/${dir}/">${dir}</a></li>`).join('')}
 		</ul>
 
 		<script type="module" src="/index.js"></script>
