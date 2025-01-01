@@ -1,10 +1,14 @@
-function snowCanvas({ canvas, flakes = 100, speed, size, opacity, precision }) {
+function snow({ canvas, flakes = 100, speed, size, opacity, precision, swaySpeed, swayAmplitude }) {
+	// Consts
 	const ctx = canvas.getContext('2d');
 	const snowflakes = [];
+
+	// Variables
 	let rect = canvas.getBoundingClientRect();
 	let canvasWidth = rect.width;
 	let canvasHeight = rect.height;
 	let numberOfSnowflakes = Math.floor((canvasWidth / 1000) * flakes);
+	let speedNaomralizeNr = canvasHeight / precision.y;
 
 	function mapSeedToRange({ seed, min, max }) {
 		return min + (max - min) * seed;
@@ -17,6 +21,8 @@ function snowCanvas({ canvas, flakes = 100, speed, size, opacity, precision }) {
 		numberOfSnowflakes = Math.floor((canvasWidth / 1000) * flakes);
 		canvas.width = canvasWidth;
 		canvas.height = canvasHeight;
+
+		speedNaomralizeNr = canvasHeight / precision.y;
 	}
 
 	function createSnowflakes() {
@@ -34,11 +40,13 @@ function snowCanvas({ canvas, flakes = 100, speed, size, opacity, precision }) {
 			radius: mapSeedToRange({ seed: seed, min: size.min, max: size.max }),
 			speed: mapSeedToRange({ seed: seed, min: speed.min, max: speed.max }),
 			opacity: mapSeedToRange({ seed: seed, min: opacity.min, max: opacity.max }),
+			sway: Math.random() * 2 * Math.PI,
+			swaySpeed: mapSeedToRange({ seed: seed, min: swaySpeed.min, max: swaySpeed.max }),
+			swayAmplitude: mapSeedToRange({ seed: seed, min: swayAmplitude.min, max: swayAmplitude.max }),
 		});
 	}
 
 	function adjustNumberOfSnowflakes() {
-		console.log('adjust', numberOfSnowflakes, snowflakes.length);
 		if (numberOfSnowflakes > snowflakes.length) {
 			const diff = numberOfSnowflakes - snowflakes.length;
 			for (let i = 0; i < diff; i++) {
@@ -55,7 +63,7 @@ function snowCanvas({ canvas, flakes = 100, speed, size, opacity, precision }) {
 	function drawSnowflakes() {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		for (const snowflake of snowflakes) {
-			const x = (canvasWidth / precision.x) * snowflake.x;
+			const x = (canvasWidth / precision.x) * snowflake.x + Math.sin(snowflake.sway) * snowflake.swayAmplitude;
 			const y = (canvasHeight / precision.y) * snowflake.y;
 			ctx.fillStyle = `rgba(255, 255, 255, ${snowflake.opacity})`;
 			ctx.beginPath();
@@ -66,10 +74,16 @@ function snowCanvas({ canvas, flakes = 100, speed, size, opacity, precision }) {
 
 	function updateSnowflakes() {
 		for (const snowflake of snowflakes) {
-			snowflake.y += snowflake.speed;
+			console.log('speedNaomralizeNr', speedNaomralizeNr);
+
+			const nomralizedSpeed = snowflake.speed / speedNaomralizeNr;
+
+			snowflake.y += nomralizedSpeed;
+			snowflake.sway += snowflake.swaySpeed;
 			if (snowflake.y > precision.y + snowflake.radius) {
 				snowflake.y = 0 - snowflake.radius;
 				snowflake.x = Math.random() * precision.x;
+				snowflake.sway = Math.random() * 2 * Math.PI;
 			}
 		}
 	}
@@ -87,4 +101,4 @@ function snowCanvas({ canvas, flakes = 100, speed, size, opacity, precision }) {
 	animateSnowflakes();
 }
 
-export { snowCanvas };
+export { snow };

@@ -1,14 +1,14 @@
 import './styles.css';
-import { snowCanvas } from './snow-canvas.js';
+import { snow } from './snow.js';
 
 const canvas = document.getElementById('snowCanvas');
 
-snowCanvas({
+snow({
 	canvas: canvas,
 	flakes: 100,
 	speed: {
 		min: 0.1,
-		max: 4,
+		max: 2,
 	},
 	size: {
 		min: 1,
@@ -21,5 +21,13 @@ snowCanvas({
 	precision: {
 		x: 2000,
 		y: 2000,
+	},
+	swaySpeed: {
+		min: 0,
+		max: 0.06,
+	},
+	swayAmplitude: {
+		min: 0.2,
+		max: 2,
 	},
 });
