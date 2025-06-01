@@ -5,10 +5,10 @@ const canvas = document.getElementById('canvas');
 
 particles({
 	canvas: canvas,
-	instances: 400,
+	instances: 500,
 	speed: {
-		min: 0.1,
-		max: 6,
+		min: 1,
+		max: 3,
 	},
 	size: {
 		min: 1,
