@@ -1,0 +1,85 @@
+html {
+	box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+	box-sizing: inherit;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	padding: 3em;
+	font-size: 1em;
+	line-height: 1.5;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+	--text-margin: 1rem;
+
+	@media (min-width: 40rem) {
+		padding: 6em;
+		--text-margin: 2rem;
+	}
+}
+
+h1 {
+	margin: var(--text-margin) 0;
+}
+
+p {
+	margin: var(--text-margin) 0;
+}
+
+section {
+	margin: 0 auto;
+	max-width: 40rem;
+	text-align: center;
+}
+
+button[popovertarget] {
+	cursor: pointer;
+	margin: 0 auto;
+	border: none;
+	border-radius: 0.3em;
+	background: #000000;
+	padding: 1rem 1.5rem;
+	color: #fff;
+	font-size: 1em;
+}
+button[popovertarget]:hover,
+button[popovertarget]:focus {
+	background: #000000;
+	color: #e0e7ff;
+}
+
+#notifications[popover] {
+	padding: 2rem;
+	position-area: bottom top left;
+}
+
+#notifications[popover]:popover-open {
+	pointer-events: auto;
+}
+
+#notifications[popover] h2 {
+	margin: 0;
+	font-size: 1.5rem;
+	line-height: 1;
+	line-height: 1;
+}
+#notifications[popover] p {
+	margin: 0.75rem 0 0.75rem 0;
+	color: #000000;
+}
+#notifications[popover] button[popoverclose] {
+	border: none;
+	border-radius: 0.25rem;
+	background: #000000;
+	padding: 1rem 1.5rem;
+	color: #ffffff;
+}
+#notifications[popover] button[popoverclose]:hover,
+#notifications[popover] button[popoverclose]:focus {
+	background: #222222;
+	color: #ffffff;
+}

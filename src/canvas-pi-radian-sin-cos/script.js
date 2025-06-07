@@ -18,4 +18,5 @@ particles({
 		min: 0.2,
 		max: 0.8,
 	},
+	agingSpeed: 0.011574123,
 });

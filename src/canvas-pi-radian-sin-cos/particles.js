@@ -1,4 +1,4 @@
-function particles({ canvas, instances = 1, speed }) {
+function particles({ canvas, instances = 1, speed, agingSpeed }) {
 	const ctx = canvas.getContext('2d');
 	const particles = [];
 
@@ -32,10 +32,12 @@ function particles({ canvas, instances = 1, speed }) {
 		const angle = Math.random() * 2 * Math.PI;
 		const radius = 0;
 		const speedVal = mapSeedToRange({ seed: Math.random(), min: speed.min, max: speed.max });
+		const start = Date.now() + Math.random() * 10000;
 
 		return {
 			angle,
 			radius,
+			start,
 			speed: speedVal,
 			age: 0,
 			size: 0.5 + Math.random() * 2,
@@ -50,8 +52,12 @@ function particles({ canvas, instances = 1, speed }) {
 	};
 
 	const draw = () => {
+		const now = Date.now();
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		particles.forEach(({ angle, radius, size, age }) => {
+		particles.forEach(({ angle, radius, size, age, start }) => {
+			if (now < start) {
+				return; // Particle not yet active
+			}
 			const x = state.center.x + Math.cos(angle) * radius;
 			const y = state.center.y + Math.sin(angle) * radius;
 			ctx.fillStyle = 'rgba(255, 255, 255, 1)';
@@ -62,8 +68,13 @@ function particles({ canvas, instances = 1, speed }) {
 	};
 
 	const update = () => {
+		const now = Date.now();
 		particles.forEach((particle, index) => {
-			particle.age += 0.011574123;
+			if (now < particle.start) {
+				return; // Particle not yet active
+			}
+
+			particle.age += agingSpeed;
 
 			const ageFactor = 1 + particle.age;
 			particle.radius += particle.speed * ageFactor;
