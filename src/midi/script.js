@@ -101,4 +101,33 @@ class MidiSynth {
 	}
 }
 
-new MidiSynth();
+class SynthInterface extends HTMLElement {
+	constructor() {
+		super();
+		this.synth = new MidiSynth();
+		this.userHasInteracted = false;
+	}
+
+	connectedCallback() {
+		this.render();
+	}
+
+	render() {
+		this.innerHTML = `
+			<div class="synth-interface">
+				<h1>MIDI Synthesizer</h1>
+				<p>Connect a MIDI device to play notes.</p>
+			</div>
+		`;
+
+		window.addEventListener('pointerdown', this.onUserGesture);
+		window.addEventListener('keydown', this.onUserGesture);
+	}
+
+	onUserGesture() {
+		this.userHasInteracted = true;
+		window.removeEventListener('pointerdown', this.onUserGesture);
+		window.removeEventListener('keydown', this.onUserGesture);
+	}
+}
+customElements.define('synth-interface', SynthInterface);
