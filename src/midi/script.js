@@ -59,10 +59,13 @@ class MidiSynth {
 	}
 
 	noteOn(note) {
-		if (!this.activeOscillators[note]) {
-			this.activeOscillators[note] = this.playBeep(note);
-			console.log(`Note on: ${note}`);
+		// Stop any existing oscillator for this note before starting a new one
+		if (this.activeOscillators[note]) {
+			this.stopBeep(this.activeOscillators[note]);
+			delete this.activeOscillators[note];
 		}
+		this.activeOscillators[note] = this.playBeep(note);
+		console.log(`Note on: ${note}`);
 	}
 
 	noteOff(note) {
