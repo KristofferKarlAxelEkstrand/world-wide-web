@@ -4,10 +4,10 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "npm run startpage && vite",
-		"build": "npm run startpage && vite build",
+		"dev": "npm run start-page && vite",
+		"build": "npm run start-page && vite build",
 		"format": "prettier --write .",
-		"startpage": "node dir.js"
+		"start-page": "node dir.js"
 	},
 	"devDependencies": {
 		"prettier": "^3.5.3",

@@ -1,5 +1,5 @@
 {
-	"name": "Name",
+	"name": "Midi Synthesizer",
 	"version": "1.0.0",
-	"description": "This thingy"
+	"description": "A synthesizer built using the midi API"
 }

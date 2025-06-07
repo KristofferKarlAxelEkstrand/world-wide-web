@@ -1,10 +1,11 @@
 import './styles.css';
 
 class MidiSynth {
-	constructor() {
+	constructor({ synthGui }) {
 		this.activeOscillators = {};
 		this.audioCtx = null;
 		this.init();
+		this.synthGui = synthGui;
 	}
 
 	async init() {
@@ -101,28 +102,27 @@ class MidiSynth {
 	}
 }
 
-class SynthInterface extends HTMLElement {
+class synthGui extends HTMLElement {
 	constructor() {
 		super();
-		this.synth = new MidiSynth();
+		this.synth = new MidiSynth({ midiInterface: this });
+		this.notes = [];
+
 		this.userHasInteracted = false;
 	}
 
 	connectedCallback() {
+		for (let note = 48; note <= 59; note++) {
+			const btn = document.createElement('button');
+			btn.setAttribute('data-note-nr', note);
+			this.notes.push(btn);
+		}
+		window.addEventListener('pointerdown', this.onUserGesture);
+		window.addEventListener('keydown', this.onUserGesture);
 		this.render();
 	}
 
-	render() {
-		this.innerHTML = `
-			<div class="synth-interface">
-				<h1>MIDI Synthesizer</h1>
-				<p>Connect a MIDI device to play notes.</p>
-			</div>
-		`;
-
-		window.addEventListener('pointerdown', this.onUserGesture);
-		window.addEventListener('keydown', this.onUserGesture);
-	}
+	render() {}
 
 	onUserGesture() {
 		this.userHasInteracted = true;
@@ -130,4 +130,4 @@ class SynthInterface extends HTMLElement {
 		window.removeEventListener('keydown', this.onUserGesture);
 	}
 }
-customElements.define('synth-interface', SynthInterface);
+customElements.define('synth-gui', synthGui);
