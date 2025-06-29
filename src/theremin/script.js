@@ -41,9 +41,40 @@ class ThereminApp extends HTMLElement {
 					font-size: 1rem;
 					z-index: 10;
 				}
+				.indicator {
+					position: absolute;
+					width: 32px;
+					height: 32px;
+					border-radius: 50%;
+					background: rgba(255,255,255,0.7);
+					border: 2px solid #fff;
+					box-shadow: 0 0 8px #fff8;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					pointer-events: none;
+					transform: translate(-50%, -50%);
+					z-index: 20;
+				}
+				.indicator-label {
+					position: absolute;
+					top: 36px;
+					left: 50%;
+					transform: translateX(-50%);
+					color: #fff;
+					font-size: 0.85rem;
+					background: rgba(0,0,0,0.5);
+					padding: 2px 6px;
+					border-radius: 4px;
+					white-space: nowrap;
+					pointer-events: none;
+				}
 			</style>
 			<div class="theremin-area">
 				<div class="label">Move mouse to play (L/R: pitch, U/D: volume)</div>
+				<div class="indicator" style="top:50%;left:50%;">
+					<div class="indicator-label"></div>
+				</div>
 			</div>
 		`;
 	}
@@ -52,6 +83,8 @@ class ThereminApp extends HTMLElement {
 
 	connectedCallback() {
 		this.thereminArea = this.shadowRoot.querySelector('.theremin-area');
+		this.indicator = this.shadowRoot.querySelector('.indicator');
+		this.indicatorLabel = this.shadowRoot.querySelector('.indicator-label');
 		this.thereminArea.addEventListener('mousedown', this.handleMouseDown);
 		window.addEventListener('mouseup', this.handleMouseUp);
 
@@ -79,9 +112,31 @@ class ThereminApp extends HTMLElement {
 				this.oscillator.frequency.setTargetAtTime(this._targetFreq, this._audioCtx.currentTime, 0.05);
 				this.gainNode.gain.setTargetAtTime(this._targetGain, this._audioCtx.currentTime, 0.05);
 			}
+			this.updateIndicator();
 			this._animationFrameId = requestAnimationFrame(animate);
 		};
 		this._animationFrameId = requestAnimationFrame(animate);
+	}
+
+	updateIndicator() {
+		const minFreq = 40,
+			maxFreq = 2000;
+		const minGain = 0.01,
+			maxGain = 1.0;
+		const area = this.thereminArea;
+		const indicator = this.indicator;
+		const label = this.indicatorLabel;
+		if (!area || !indicator || !label) return;
+		const width = area.clientWidth;
+		const height = area.clientHeight;
+
+		// Map _currentFreq and _currentGain to x/y
+		const x = ((this._currentFreq - minFreq) / (maxFreq - minFreq)) * width;
+		const y = ((maxGain - this._currentGain) / (maxGain - minGain)) * height;
+
+		indicator.style.left = `${x}px`;
+		indicator.style.top = `${y}px`;
+		label.textContent = `Freq: ${this._currentFreq.toFixed(1)} Hz, Gain: ${this._currentGain.toFixed(2)}`;
 	}
 
 	disconnectedCallback() {
