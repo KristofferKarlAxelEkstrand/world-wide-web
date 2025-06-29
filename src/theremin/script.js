@@ -51,7 +51,7 @@ class ThereminApp extends HTMLElement {
 
 		this.innerHTML = `
 			<style>
-				:host, theremin-app {
+				theremin-app {
 					display: block;
 					width: 100%;
 					height: 30rem;
@@ -61,7 +61,7 @@ class ThereminApp extends HTMLElement {
 					width: 100%;
 					height: 100%;
 					position: relative;
-					background-color: #ff3300;
+					background-color:rgb(60, 64, 70);
 					cursor: crosshair;
 				}
 				.label {
