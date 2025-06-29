@@ -19,6 +19,8 @@ class ThereminApp extends HTMLElement {
 	oscillator = null;
 	gainNode = null;
 
+	_notes = getNoteArray();
+
 	_animationFrameId = null;
 	_targetFreq = 440;
 	_targetGain = 0.5;
@@ -27,6 +29,28 @@ class ThereminApp extends HTMLElement {
 
 	constructor() {
 		super();
+
+		this._settings = {
+			range: {
+				min: this._notes[0],
+				max: this._notes[this._notes.length - 1],
+			},
+			smoothingFactors: {
+				frequency: 0.2,
+				gain: 0.2,
+			},
+			vibrato: {
+				base: {
+					frequency: 5,
+					amplitude: 0.1,
+				},
+				expression: {
+					frequency: 5,
+					amplitude: 0.1,
+				},
+			},
+		};
+
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.innerHTML = `
 			<style>
@@ -86,6 +110,25 @@ class ThereminApp extends HTMLElement {
 					pointer-events: none;
 				}
 			</style>
+<div class="theremin-settings">
+
+<div class="theremin-settings-group">
+		Volume
+		<input
+			type="range"
+			min="0"
+			max="1"
+			step="0.01"
+			value="0.5"
+			style="width: 120px;"
+			aria-label="Volume"
+			oninput="this.getRootNode().host._targetGain = parseFloat(this.value)"
+		/>
+</div>
+
+		vibrato volume range
+</div>
+
 			<div class="theremin-area">
 				<div class="label">Move mouse to play (L/R: pitch, U/D: volume)</div>
 				<div class="indicator" style="top:50%;left:50%;">
@@ -105,8 +148,8 @@ class ThereminApp extends HTMLElement {
 		window.addEventListener('mouseup', this.handleMouseUp);
 
 		this._updateTarget = (x, y, width, height) => {
-			const minFreq = 16.35,
-				maxFreq = 2000;
+			const minFreq = this._settings.range.min.frequency,
+				maxFreq = this._settings.range.max.frequency;
 			this._targetFreq = minFreq + (x / width) * (maxFreq - minFreq);
 
 			const minGain = 0.01,
@@ -135,9 +178,9 @@ class ThereminApp extends HTMLElement {
 	}
 
 	updateIndicator() {
-		const minFreq = 40,
-			maxFreq = 2000;
-		const minGain = 0.01,
+		const minFreq = this._settings.range.min.frequency,
+			maxFreq = this._settings.range.max.frequency;
+		const minGain = 0,
 			maxGain = 1.0;
 		const area = this.thereminArea;
 		const indicator = this.indicator;
@@ -146,7 +189,6 @@ class ThereminApp extends HTMLElement {
 		const width = area.clientWidth;
 		const height = area.clientHeight;
 
-		// Map _currentFreq and _currentGain to x/y
 		const x = ((this._currentFreq - minFreq) / (maxFreq - minFreq)) * width;
 		const y = ((maxGain - this._currentGain) / (maxGain - minGain)) * height;
 
@@ -165,6 +207,8 @@ class ThereminApp extends HTMLElement {
 	}
 
 	handleMouseDown = (e) => {
+		console.log('Mouse down on theremin area', e, this._settings);
+
 		if (!this._audioCtx) {
 			const AudioCtx = window.AudioContext || window.webkitAudioContext;
 			this._audioCtx = new AudioCtx();
