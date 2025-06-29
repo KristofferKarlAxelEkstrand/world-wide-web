@@ -14,30 +14,39 @@ function getNoteArray() {
 }
 
 class ThereminApp extends HTMLElement {
-	_audioCtx = null;
-	_oscillator = null;
-	_gainNode = null;
+	#audioCtx = null;
+	#oscillator = null;
+	#gainNode = null;
+	#notes = getNoteArray();
 
-	_notes = getNoteArray();
+	#animationFrameId = null;
 
-	_animationFrameId = null;
-	_targetFreq = 440;
-	_targetGain = 0;
-	_targetGainMapped = 0;
-	_currentFreq = 440;
-	_currentGain = 0;
-	_currentGainMapped = 0;
+	#targetFreq = 440;
+	#currentFreq = 440;
 
-	_lfo = null;
-	_lfoGain = null;
+	#targetGain = 0.5;
+	#currentGain = 0.5;
+
+	#targetGainMapped = 0.5;
+	#currentGainMapped = 0.5;
+
+	#lfo = null;
+	#lfoGain = null;
+
+	#noteMatrix = this.querySelector('.note-matrix');
+
+	#settings = null;
 
 	constructor() {
 		super();
 
-		this._settings = {
+		this.#settings = {
+			volume: {
+				volume: 0.5,
+			},
 			range: {
-				min: this._notes[12],
-				max: this._notes[48],
+				min: this.#notes[12],
+				max: this.#notes[48],
 			},
 			smoothingFactors: {
 				frequency: 0.2,
@@ -47,83 +56,80 @@ class ThereminApp extends HTMLElement {
 				frequency: 5,
 				amplitude: 2,
 			},
+			vibratoExpression: {
+				frequency: 5,
+				amplitude: 2,
+			},
 		};
 	}
 
 	updateSetting({ value, group, name }) {
-		if (!this._settings.hasOwnProperty(group)) {
-			this._settings[group] = {};
+		if (!this.#settings.hasOwnProperty(group)) {
+			this.#settings[group] = {};
 		}
-		if (!this._settings[group].hasOwnProperty(name)) {
-			this._settings[group][name] = value;
+		if (!this.#settings[group].hasOwnProperty(name)) {
+			this.#settings[group][name] = value;
 		}
-		this._settings[group][name] = value;
+		this.#settings[group][name] = value;
 		console.log(`Setting updated: ${group}.${name} = ${value}`);
-		console.log('Current settings:', this._settings);
+		console.log('Current settings:', this.#settings);
 	}
 
 	setupLFO() {
-		if (!this._audioCtx) return;
-		this._lfo = this._audioCtx.createOscillator();
-		this._lfoGain = this._audioCtx.createGain();
+		if (!this.#audioCtx) return;
+		this.#lfo = this.#audioCtx.createOscillator();
+		this.#lfoGain = this.#audioCtx.createGain();
 
-		const vibrato = this._settings.vibrato;
-		this._lfo.type = 'sine';
-		this._lfo.frequency.value = vibrato.frequency;
-		this._lfoGain.gain.value = vibrato.amplitude * 50;
+		const vibrato = this.#settings.vibrato;
+		this.#lfo.type = 'sine';
+		this.#lfo.frequency.value = vibrato.frequency;
+		this.#lfoGain.gain.value = vibrato.amplitude * 50;
 
-		this._lfo.connect(this._lfoGain);
-		this._lfoGain.connect(this._oscillator.frequency);
-		this._lfo.start();
+		this.#lfo.connect(this.#lfoGain);
+		this.#lfoGain.connect(this.#oscillator.frequency);
+		this.#lfo.start();
 	}
 
 	stopLFO() {
-		if (this._lfo) {
-			this._lfo.stop();
-			this._lfo.disconnect();
-			this._lfo = null;
+		if (this.#lfo) {
+			this.#lfo.stop();
+			this.#lfo.disconnect();
+			this.#lfo = null;
 		}
-		if (this._lfoGain) {
-			this._lfoGain.disconnect();
-			this._lfoGain = null;
+		if (this.#lfoGain) {
+			this.#lfoGain.disconnect();
+			this.#lfoGain = null;
 		}
 	}
 
 	startOscillator() {
-		if (this._oscillator) return;
-		this._oscillator = this._audioCtx.createOscillator();
-		this._gainNode = this._audioCtx.createGain();
-		this._oscillator.type = 'sawtooth';
-		this._oscillator.connect(this._gainNode);
-		this._gainNode.connect(this._audioCtx.destination);
-		this._gainNode.gain.value = 0;
-		this._oscillator.start();
+		if (this.#oscillator) return;
+		this.#oscillator = this.#audioCtx.createOscillator();
+		this.#gainNode = this.#audioCtx.createGain();
+		this.#oscillator.type = 'sawtooth';
+		this.#oscillator.connect(this.#gainNode);
+		this.#gainNode.connect(this.#audioCtx.destination);
+		this.#gainNode.gain.value = 0;
+		this.#oscillator.start();
 		this.setupLFO();
 	}
 
-	// Override stopOscillator to clean up LFO
 	stopOscillator() {
-		if (!this._oscillator) return;
+		if (!this.#oscillator) return;
 		this.stopLFO();
-		this._oscillator.stop();
-		this._oscillator.disconnect();
-		this._gainNode.disconnect();
-		this._oscillator = null;
-		this._gainNode = null;
+		this.#oscillator.stop();
+		this.#oscillator.disconnect();
+		this.#gainNode.disconnect();
+		this.#oscillator = null;
+		this.#gainNode = null;
 	}
 
 	linearInterpolation = (a, b, t) => a + (b - a) * t;
 
 	connectedCallback() {
-		const noteMatrix = this.querySelector('.note-matrix');
-		if (noteMatrix) {
-			const minMidi = this._settings.range.min.midi;
-			const maxMidi = this._settings.range.max.midi;
-			const notesInRange = this._notes.filter((n) => n.midi >= minMidi && n.midi <= maxMidi);
-			noteMatrix.innerHTML = notesInRange.map((n) => `<div class="note" data-midi="${n.midi}" data-note="${n.name}" ></div>`).join('');
-		}
+		this._updateNoteMatrix();
 
-		console.log('ThereminApp notes:', this._notes);
+		console.log('ThereminApp notes:', this.#notes);
 
 		this.thereminXYPad = this.querySelector('.theremin-xy-pad');
 		this.indicator = this.querySelector('.indicator');
@@ -131,46 +137,55 @@ class ThereminApp extends HTMLElement {
 		this.thereminXYPad.addEventListener('mousedown', this.handleMouseDown);
 		window.addEventListener('mouseup', this.handleMouseUp);
 
-		this._animationFrameId = requestAnimationFrame(this.animate);
+		this.#animationFrameId = requestAnimationFrame(this.animate);
 	}
 
+	_updateNoteMatrix = () => {
+		if (this.#noteMatrix) {
+			const minMidi = this.#settings.range.min.midi;
+			const maxMidi = this.#settings.range.max.midi;
+			const notesInRange = this.#notes.filter((n) => n.midi >= minMidi && n.midi <= maxMidi);
+			this.#noteMatrix.innerHTML = notesInRange.map((n) => `<div class="note" data-midi="${n.midi}" data-note="${n.name}" ></div>`).join('');
+		}
+	};
+
 	animate = () => {
-		if (this._oscillator && this._gainNode) {
-			this._currentFreq = this.linearInterpolation(this._currentFreq, this._targetFreq, 0.2);
-			this._currentGain = this.linearInterpolation(this._currentGain, this._targetGain, 0.2);
+		if (this.#oscillator && this.#gainNode) {
+			this.#currentFreq = this.linearInterpolation(this.#currentFreq, this.#targetFreq, 0.2);
+			this.#currentGain = this.linearInterpolation(this.#currentGain, this.#targetGain, 0.2);
 
-			this._currentGainMapped = this.linearInterpolation(this._currentGainMapped, this._targetGainMapped, 0.2);
+			this.#currentGainMapped = this.linearInterpolation(this.#currentGainMapped, this.#targetGainMapped, 0.2);
 
-			if (this._lfo && this._lfoGain) {
-				console.log('Updating LFO settings:', this._settings.vibrato);
-				this._lfo.frequency.setTargetAtTime(this._settings.vibrato.frequency, this._audioCtx.currentTime, 0.05);
-				this._lfoGain.gain.setTargetAtTime(this._settings.vibrato.amplitude, this._audioCtx.currentTime, 0.05);
+			if (this.#lfo && this.#lfoGain) {
+				console.log('Updating LFO settings:', this.#settings.vibrato);
+				this.#lfo.frequency.setTargetAtTime(this.#settings.vibrato.frequency, this.#audioCtx.currentTime, 0.05);
+				this.#lfoGain.gain.setTargetAtTime(this.#settings.vibrato.amplitude, this.#audioCtx.currentTime, 0.05);
 			}
 
-			this._oscillator.frequency.setTargetAtTime(this._currentFreq, this._audioCtx.currentTime, 0.05);
+			this.#oscillator.frequency.setTargetAtTime(this.#currentFreq, this.#audioCtx.currentTime, 0.05);
 
-			this._gainNode.gain.setTargetAtTime(this._currentGainMapped, this._audioCtx.currentTime, 0.05);
+			this.#gainNode.gain.setTargetAtTime(this.#currentGainMapped * this.#settings.volume.volume, this.#audioCtx.currentTime, 0.05);
 		}
 		this.updateIndicator();
-		this._animationFrameId = requestAnimationFrame(this.animate);
+		this.#animationFrameId = requestAnimationFrame(this.animate);
 	};
 
 	_updateTarget = (x, y, width, height) => {
-		const minFreq = this._settings.range.min.frequency,
-			maxFreq = this._settings.range.max.frequency;
+		const minFreq = this.#settings.range.min.frequency,
+			maxFreq = this.#settings.range.max.frequency;
 
-		this._targetFreq = minFreq + (x / width) * (maxFreq - minFreq);
+		this.#targetFreq = minFreq + (x / width) * (maxFreq - minFreq);
 
 		const minGain = 0.01,
 			maxGain = 1.0;
-		this._targetGain = maxGain - (y / height) * (maxGain - minGain);
+		this.#targetGain = maxGain - (y / height) * (maxGain - minGain);
 
-		if (this._targetGain > 0.6) {
-			this._targetGainMapped = 1;
-		} else if (this._targetGain > 0.15) {
-			this._targetGainMapped = (this._targetGain - 0.15) / (0.6 - 0.15);
+		if (this.#targetGain > 0.6) {
+			this.#targetGainMapped = 1;
+		} else if (this.#targetGain > 0.15) {
+			this.#targetGainMapped = (this.#targetGain - 0.15) / (0.6 - 0.15);
 		} else {
-			this._targetGainMapped = 0;
+			this.#targetGainMapped = 0;
 		}
 	};
 
@@ -190,8 +205,8 @@ class ThereminApp extends HTMLElement {
 	};
 
 	updateIndicator() {
-		const minFreq = this._settings.range.min.frequency,
-			maxFreq = this._settings.range.max.frequency;
+		const minFreq = this.#settings.range.min.frequency,
+			maxFreq = this.#settings.range.max.frequency;
 		const minGain = 0,
 			maxGain = 1.0;
 		const area = this.thereminXYPad;
@@ -201,8 +216,8 @@ class ThereminApp extends HTMLElement {
 		const width = area.clientWidth;
 		const height = area.clientHeight;
 
-		const x = ((this._currentFreq - minFreq) / (maxFreq - minFreq)) * width;
-		const y = ((maxGain - this._currentGain) / (maxGain - minGain)) * height;
+		const x = ((this.#currentFreq - minFreq) / (maxFreq - minFreq)) * width;
+		const y = ((maxGain - this.#currentGain) / (maxGain - minGain)) * height;
 
 		indicator.style.left = `${x}px`;
 		indicator.style.top = `${y}px`;
@@ -214,18 +229,18 @@ class ThereminApp extends HTMLElement {
 		window.removeEventListener('mousemove', this.handleMouseMove);
 		window.removeEventListener('mouseup', this.handleMouseUp);
 		this.stopOscillator();
-		cancelAnimationFrame(this._animationFrameId);
+		cancelAnimationFrame(this.#animationFrameId);
 	}
 
 	handleMouseDown = (e) => {
-		console.log('Mouse down on theremin area', e, this._settings);
+		console.log('Mouse down on theremin area', e, this.#settings);
 
-		if (!this._audioCtx) {
+		if (!this.#audioCtx) {
 			const AudioCtx = window.AudioContext || window['webkitAudioContext'];
-			this._audioCtx = new AudioCtx();
+			this.#audioCtx = new AudioCtx();
 			this.startOscillator();
-		} else if (this._audioCtx.state === 'suspended') {
-			this._audioCtx.resume();
+		} else if (this.#audioCtx.state === 'suspended') {
+			this.#audioCtx.resume();
 		}
 		this.thereminXYPad.addEventListener('mousemove', this.handleMouseMove);
 		window.addEventListener('mousemove', this.handleMouseMove);
@@ -248,8 +263,8 @@ class DialKnob extends HTMLElement {
 	#max = 100;
 	#step = 1;
 	#value = 50;
-	#settingGroup = this.getAttribute('setting-group') || 'vibrato';
-	#settingName = this.getAttribute('setting-name') || 'frequency';
+	#settingGroup = this.getAttribute('setting-group') || 'x';
+	#settingName = this.getAttribute('setting-name') || 'y';
 	#svg = null;
 	#svgDot = null;
 	#startY = 0;
