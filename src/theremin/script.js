@@ -15,8 +15,8 @@ function getNoteArray() {
 
 class ThereminApp extends HTMLElement {
 	_audioCtx = null;
-	oscillator = null;
-	gainNode = null;
+	_oscillator = null;
+	_gainNode = null;
 
 	_notes = getNoteArray();
 
@@ -154,15 +154,15 @@ class ThereminApp extends HTMLElement {
 	}
 
 	animate = () => {
-		if (this.oscillator && this.gainNode) {
+		if (this._oscillator && this._gainNode) {
 			this._currentFreq = this.linearInterpolation(this._currentFreq, this._targetFreq, 0.2);
 			this._currentGain = this.linearInterpolation(this._currentGain, this._targetGain, 0.2);
 
 			this._currentGainMapped = this.linearInterpolation(this._currentGainMapped, this._targetGainMapped, 0.2);
 
-			this.oscillator.frequency.setTargetAtTime(this._targetFreq, this._audioCtx.currentTime, 0.05);
+			this._oscillator.frequency.setTargetAtTime(this._targetFreq, this._audioCtx.currentTime, 0.05);
 
-			this.gainNode.gain.setTargetAtTime(this._currentGainMapped, this._audioCtx.currentTime, 0.05);
+			this._gainNode.gain.setTargetAtTime(this._currentGainMapped, this._audioCtx.currentTime, 0.05);
 		}
 		this.updateIndicator();
 		this._animationFrameId = requestAnimationFrame(this.animate);
@@ -247,23 +247,23 @@ class ThereminApp extends HTMLElement {
 	};
 
 	startOscillator() {
-		if (this.oscillator) return;
-		this.oscillator = this._audioCtx.createOscillator();
-		this.gainNode = this._audioCtx.createGain();
-		this.oscillator.type = 'sawtooth';
-		this.oscillator.connect(this.gainNode);
-		this.gainNode.connect(this._audioCtx.destination);
-		this.gainNode.gain.value = 0;
-		this.oscillator.start();
+		if (this._oscillator) return;
+		this._oscillator = this._audioCtx.createOscillator();
+		this._gainNode = this._audioCtx.createGain();
+		this._oscillator.type = 'sawtooth';
+		this._oscillator.connect(this._gainNode);
+		this._gainNode.connect(this._audioCtx.destination);
+		this._gainNode.gain.value = 0;
+		this._oscillator.start();
 	}
 
 	stopOscillator() {
-		if (!this.oscillator) return;
-		this.oscillator.stop();
-		this.oscillator.disconnect();
-		this.gainNode.disconnect();
-		this.oscillator = null;
-		this.gainNode = null;
+		if (!this._oscillator) return;
+		this._oscillator.stop();
+		this._oscillator.disconnect();
+		this._gainNode.disconnect();
+		this._oscillator = null;
+		this._gainNode = null;
 	}
 
 	handleMouseUp = () => {
