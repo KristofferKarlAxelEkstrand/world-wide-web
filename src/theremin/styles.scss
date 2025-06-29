@@ -28,7 +28,11 @@ section {
 }
 
 theremin-app {
-	display: block;
+	display: flex;
+	flex-direction: column;
+	border-radius: 0.5rem;
+	background-color: #adadad;
+	padding: 1rem;
 	width: 100%;
 	height: 30rem;
 	overflow: hidden;
@@ -62,35 +66,114 @@ theremin-app {
 			}
 		}
 	}
-}
 
-.label {
-	position: absolute;
-	top: 10px;
-	left: 10px;
-	z-index: 10;
-	border-radius: 4px;
-	background: rgba(0, 0, 0, 0.4);
-	padding: 4px 8px;
-	color: #fff;
-	font-size: 1rem;
-	font-family: sans-serif;
-}
+	> .theremin-xy-pad {
+		position: relative;
+		cursor: crosshair;
+		border-radius: 0.3rem;
+		background-color: rgb(60, 64, 70);
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
 
-.indicator {
-	display: flex;
-	position: absolute;
-	justify-content: center;
-	align-items: center;
-	transform: translate(-50%, -50%);
-	z-index: 20;
-	box-shadow: 0 0 8px #fff8;
-	border: 2px solid #fff;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.7);
-	width: 32px;
-	height: 32px;
-	pointer-events: none;
+		> .indicator {
+			display: flex;
+			position: absolute;
+			justify-content: center;
+			align-items: center;
+			transform: translate(-50%, -50%);
+			z-index: 20;
+
+			border: 2px solid #ffffff4f;
+			border-radius: 50%;
+			background: rgba(255, 255, 255, 0.185);
+			width: 4rem;
+			height: 4rem;
+			pointer-events: none;
+		}
+
+		.note-matrix {
+			display: flex;
+			gap: 0;
+			opacity: 0.05;
+			height: 100%;
+			pointer-events: none;
+			user-select: none;
+			> div {
+				flex: 1;
+				flex-grow: 1;
+				border: none;
+				background-color: #f9f9f9;
+				padding: 0;
+				overflow: hidden;
+				pointer-events: none;
+				user-select: none;
+				text-align: center;
+
+				&[data-note^='C'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				&[data-note^='C#'] {
+					background-color: #000000;
+					color: #000000;
+					font-weight: bold;
+				}
+				&[data-note^='D'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				&[data-note^='D#'] {
+					background-color: #000000;
+					color: #000000;
+					font-weight: bold;
+				}
+
+				&[data-note^='E'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				&[data-note^='F'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				&[data-note^='F#'] {
+					background-color: #000000;
+					color: #000000;
+					font-weight: bold;
+				}
+				&[data-note^='G'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				&[data-note^='G#'] {
+					background-color: #000000;
+					color: #000000;
+					font-weight: bold;
+				}
+				&[data-note^='A'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				&[data-note^='A#'] {
+					background-color: #000000;
+					color: #000000;
+					font-weight: bold;
+				}
+				&[data-note^='B'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+			}
+		}
+	}
 }
 
 .indicator-label {
@@ -105,94 +188,4 @@ theremin-app {
 	color: #fff;
 	font-size: 0.85rem;
 	white-space: nowrap;
-}
-
-.theremin-xy-pad {
-	position: relative;
-	cursor: crosshair;
-	background-color: rgb(60, 64, 70);
-	width: 100%;
-	height: 100%;
-
-	.note-matrix {
-		display: flex;
-		gap: 0;
-		opacity: 0.05;
-		height: 100%;
-		pointer-events: none;
-		user-select: none;
-		> div {
-			flex: 1;
-			flex-grow: 1;
-			border: none;
-			background-color: #f9f9f9;
-			padding: 0;
-			overflow: hidden;
-			pointer-events: none;
-			user-select: none;
-			text-align: center;
-
-			&[data-note^='C'] {
-				background-color: #ffffff;
-				color: #ffffff;
-				font-weight: bold;
-			}
-			&[data-note^='C#'] {
-				background-color: #000000;
-				color: #000000;
-				font-weight: bold;
-			}
-			&[data-note^='D'] {
-				background-color: #ffffff;
-				color: #ffffff;
-				font-weight: bold;
-			}
-			&[data-note^='D#'] {
-				background-color: #000000;
-				color: #000000;
-				font-weight: bold;
-			}
-
-			&[data-note^='E'] {
-				background-color: #ffffff;
-				color: #ffffff;
-				font-weight: bold;
-			}
-			&[data-note^='F'] {
-				background-color: #ffffff;
-				color: #ffffff;
-				font-weight: bold;
-			}
-			&[data-note^='F#'] {
-				background-color: #000000;
-				color: #000000;
-				font-weight: bold;
-			}
-			&[data-note^='G'] {
-				background-color: #ffffff;
-				color: #ffffff;
-				font-weight: bold;
-			}
-			&[data-note^='G#'] {
-				background-color: #000000;
-				color: #000000;
-				font-weight: bold;
-			}
-			&[data-note^='A'] {
-				background-color: #ffffff;
-				color: #ffffff;
-				font-weight: bold;
-			}
-			&[data-note^='A#'] {
-				background-color: #000000;
-				color: #000000;
-				font-weight: bold;
-			}
-			&[data-note^='B'] {
-				background-color: #ffffff;
-				color: #ffffff;
-				font-weight: bold;
-			}
-		}
-	}
 }
