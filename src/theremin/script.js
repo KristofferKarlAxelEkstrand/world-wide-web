@@ -22,9 +22,11 @@ class ThereminApp extends HTMLElement {
 
 	_animationFrameId = null;
 	_targetFreq = 440;
-	_targetGain = 0.5;
+	_targetGain = 0;
+	_targetGainMapped = 0;
 	_currentFreq = 440;
-	_currentGain = 0.5;
+	_currentGain = 0;
+	_currentGainMapped = 0;
 
 	constructor() {
 		super();
@@ -155,8 +157,12 @@ class ThereminApp extends HTMLElement {
 		if (this.oscillator && this.gainNode) {
 			this._currentFreq = this.linearInterpolation(this._currentFreq, this._targetFreq, 0.2);
 			this._currentGain = this.linearInterpolation(this._currentGain, this._targetGain, 0.2);
+
+			this._currentGainMapped = this.linearInterpolation(this._currentGainMapped, this._targetGainMapped, 0.2);
+
 			this.oscillator.frequency.setTargetAtTime(this._targetFreq, this._audioCtx.currentTime, 0.05);
-			this.gainNode.gain.setTargetAtTime(this._targetGain, this._audioCtx.currentTime, 0.05);
+
+			this.gainNode.gain.setTargetAtTime(this._currentGainMapped, this._audioCtx.currentTime, 0.05);
 		}
 		this.updateIndicator();
 		this._animationFrameId = requestAnimationFrame(this.animate);
@@ -171,6 +177,14 @@ class ThereminApp extends HTMLElement {
 		const minGain = 0.01,
 			maxGain = 1.0;
 		this._targetGain = maxGain - (y / height) * (maxGain - minGain);
+
+		if (this._targetGain > 0.6) {
+			this._targetGainMapped = 1;
+		} else if (this._targetGain > 0.15) {
+			this._targetGainMapped = (this._targetGain - 0.15) / (0.6 - 0.15);
+		} else {
+			this._targetGainMapped = 0;
+		}
 	};
 
 	handleMouseMove = (e) => {
@@ -221,7 +235,7 @@ class ThereminApp extends HTMLElement {
 		console.log('Mouse down on theremin area', e, this._settings);
 
 		if (!this._audioCtx) {
-			const AudioCtx = window.AudioContext || window.webkitAudioContext;
+			const AudioCtx = window.AudioContext || window?.webkitAudioContext;
 			this._audioCtx = new AudioCtx();
 			this.startOscillator();
 		} else if (this._audioCtx.state === 'suspended') {
