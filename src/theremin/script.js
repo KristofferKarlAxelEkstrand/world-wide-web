@@ -31,12 +31,43 @@ class ThereminApp extends HTMLElement {
 	_lfo = null;
 	_lfoGain = null;
 
+	constructor() {
+		super();
+
+		this._settings = {
+			range: {
+				min: this._notes[12],
+				max: this._notes[48],
+			},
+			smoothingFactors: {
+				frequency: 0.2,
+				gain: 0.2,
+			},
+			vibrato: {
+				frequency: 5,
+				amplitude: 2,
+			},
+		};
+	}
+
+	updateSetting({ value, group, name }) {
+		if (!this._settings.hasOwnProperty(group)) {
+			this._settings[group] = {};
+		}
+		if (!this._settings[group].hasOwnProperty(name)) {
+			this._settings[group][name] = value;
+		}
+		this._settings[group][name] = value;
+		console.log(`Setting updated: ${group}.${name} = ${value}`);
+		console.log('Current settings:', this._settings);
+	}
+
 	setupLFO() {
 		if (!this._audioCtx) return;
 		this._lfo = this._audioCtx.createOscillator();
 		this._lfoGain = this._audioCtx.createGain();
 
-		const vibrato = this._settings.vibrato.base;
+		const vibrato = this._settings.vibrato;
 		this._lfo.type = 'sine';
 		this._lfo.frequency.value = vibrato.frequency;
 		this._lfoGain.gain.value = vibrato.amplitude * 50;
@@ -81,92 +112,15 @@ class ThereminApp extends HTMLElement {
 		this._gainNode = null;
 	}
 
-	constructor() {
-		super();
-
-		this._settings = {
-			range: {
-				min: this._notes[12],
-				max: this._notes[48],
-			},
-			smoothingFactors: {
-				frequency: 0.2,
-				gain: 0.2,
-			},
-			vibrato: {
-				base: {
-					frequency: 5,
-					amplitude: 2,
-				},
-				expression: {
-					frequency: 6,
-					amplitude: 5,
-				},
-			},
-		};
-
-		this.innerHTML = `
-			<div class="theremin-settings">
-				<div class="theremin-settings-group">
-					Volume
-					<div>
-					Speed
-					<dial-knob min="0" max="100" value="50" step="1" sizeRem="2"></dial-knob>
-
-					</div>
-				</div>
-				<div class="theremin-settings-group">
-					Vibrato
-					<div>
-					Speed
-<dial-knob min="0" max="100" value="50" step="1" sizeRem="2"></dial-knob>
-					</div>
-
-										<div>
-					Depth 
-					<input
-						type="range"
-						min="0"
-						max="1"
-						step="0.01"
-						value="0.5"
-						style="width: 120px;"
-						aria-label="Volume"
-						oninput="this.getRootNode().host._targetGain = parseFloat(this.value)"
-					/>
-					</div>
-				</div>
-				<div class="theremin-settings-group">
-					Range
-				</div>
-
-				<div class="theremin-settings-buttons">
-
-					<button class="fullscreen-button">
-
-				</div>
-
-
-
-			</div>
-			<div class="theremin-xy-pad">
-
-				<div class="note-matrix"></div>
-				<div class="indicator"></div>
-			</div>
-		`;
-	}
-
 	linearInterpolation = (a, b, t) => a + (b - a) * t;
 
 	connectedCallback() {
-		// Render note matrix based on settings.range.min and settings.range.max
 		const noteMatrix = this.querySelector('.note-matrix');
 		if (noteMatrix) {
 			const minMidi = this._settings.range.min.midi;
 			const maxMidi = this._settings.range.max.midi;
 			const notesInRange = this._notes.filter((n) => n.midi >= minMidi && n.midi <= maxMidi);
-			noteMatrix.innerHTML = notesInRange.map((n) => `<div class="note" data-midi="${n.midi}" data-note="${n.name}" >${n.name}</div>`).join('');
+			noteMatrix.innerHTML = notesInRange.map((n) => `<div class="note" data-midi="${n.midi}" data-note="${n.name}" ></div>`).join('');
 		}
 
 		console.log('ThereminApp notes:', this._notes);
@@ -188,8 +142,9 @@ class ThereminApp extends HTMLElement {
 			this._currentGainMapped = this.linearInterpolation(this._currentGainMapped, this._targetGainMapped, 0.2);
 
 			if (this._lfo && this._lfoGain) {
-				this._lfo.frequency.setTargetAtTime(this._settings.vibrato.base.frequency, this._audioCtx.currentTime, 0.05);
-				this._lfoGain.gain.setTargetAtTime(this._settings.vibrato.base.amplitude, this._audioCtx.currentTime, 0.05);
+				console.log('Updating LFO settings:', this._settings.vibrato);
+				this._lfo.frequency.setTargetAtTime(this._settings.vibrato.frequency, this._audioCtx.currentTime, 0.05);
+				this._lfoGain.gain.setTargetAtTime(this._settings.vibrato.amplitude, this._audioCtx.currentTime, 0.05);
 			}
 
 			this._oscillator.frequency.setTargetAtTime(this._currentFreq, this._audioCtx.currentTime, 0.05);
@@ -293,15 +248,17 @@ class DialKnob extends HTMLElement {
 	#max = 100;
 	#step = 1;
 	#value = 50;
+	#settingGroup = this.getAttribute('setting-group') || 'vibrato';
+	#settingName = this.getAttribute('setting-name') || 'frequency';
 	#svg = null;
 	#svgDot = null;
 	#startY = 0;
 	#startValue = 0;
+	#thereminApp = this.closest('theremin-app');
 
 	constructor() {
 		super();
 		this.innerHTML = `
-
 			<svg viewBox="0 0 128 128">
 				<circle cx="64" cy="64" r="64" class="svg-knob"/>
 				<circle id="dot" class="svg-knob-dot"
@@ -342,6 +299,8 @@ class DialKnob extends HTMLElement {
 		this.#min = Number(this.getAttribute('min')) ?? 0;
 		this.#max = Number(this.getAttribute('max')) ?? 100;
 		this.#step = Number(this.getAttribute('step')) ?? 1;
+		this.#settingGroup = this.getAttribute('setting-group') || 'vibrato';
+		this.#settingName = this.getAttribute('setting-name') || 'frequency';
 		this.#value = this.hasAttribute('value') ? Number(this.getAttribute('value')) : this.#value;
 	}
 
@@ -352,6 +311,11 @@ class DialKnob extends HTMLElement {
 			this.setAttribute('value', v);
 			this.#draw();
 			this.dispatchEvent(new CustomEvent('change', { detail: { value: this.#value } }));
+			this.#thereminApp.updateSetting({
+				group: this.#settingGroup,
+				name: this.#settingName,
+				value: this.#value,
+			});
 		}
 	}
 	get value() {

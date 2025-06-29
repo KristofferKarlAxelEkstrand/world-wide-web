@@ -30,9 +30,13 @@ section {
 theremin-app {
 	display: flex;
 	flex-direction: column;
+	gap: 2rem;
+	box-shadow:
+		inset 0 0 0.2rem rgb(0 0 0 / 13%),
+		inset 0 0 0.5rem rgb(0 0 0 / 8%);
 	border-radius: 0.5rem;
-	background-color: #adadad;
-	padding: 1rem;
+	background-color: #f3f3f3;
+	padding: 2rem;
 	width: 100%;
 	height: 30rem;
 	overflow: hidden;
@@ -44,25 +48,32 @@ theremin-app {
 
 		> .theremin-settings-group {
 			display: flex;
-			flex-direction: row;
+			flex-grow: 0;
+			flex-direction: column;
 			gap: 0.5rem;
+			border: 1px solid #d8d8d8;
+			border-radius: 0.5rem;
+			padding: 1rem;
 			width: 100%;
 			max-width: 20rem;
 
-			> label {
-				margin-bottom: 0.25rem;
-				color: var(--secondary-color);
-				font-size: 0.9rem;
-			}
+			> div {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				gap: 0.5rem;
+				font-size: 0.8rem;
 
-			> input,
-			> select {
-				border: 1px solid var(--secondary-color);
-				border-radius: 4px;
-				background-color: var(--tertiary-color);
-				padding: 0.5rem;
-				width: 100%;
-				font-size: 1rem;
+				> div {
+					display: flex;
+					flex-grow: 1;
+					flex-direction: column;
+					justify-content: center;
+					align-items: center;
+					gap: 0.5rem;
+					padding: 1rem;
+					width: 50%;
+				}
 			}
 		}
 	}
@@ -70,7 +81,7 @@ theremin-app {
 	> .theremin-xy-pad {
 		position: relative;
 		cursor: crosshair;
-		border-radius: 0.3rem;
+		border-radius: 0.5rem;
 		background-color: rgb(60, 64, 70);
 		width: 100%;
 		height: 100%;

@@ -1,12 +1,38 @@
 <!doctype html>
 <html lang="en">
 	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<title>Products</title>
 	</head>
 	<body>
-		<theremin-app></theremin-app>
+		<theremin-app>
+
+			<div class="theremin-settings">
+				<div class="theremin-settings-group">
+					Vibrato
+					<div>
+						<div>
+							<dial-knob min="0" max="10" value="6" step="0.01" setting-group="vibrato" setting-name="frequency"></dial-knob>
+							Speed
+						</div>
+						<div>
+							<dial-knob min="0" max="30" value="6" step="0.001" setting-group="vibrato" setting-name="amplitude"></dial-knob>
+							Amplitude
+						</div>
+					</div>
+				</div>
+
+				<div class="theremin-settings-buttons">
+					<button class="fullscreen-button"></button>
+				</div>
+			</div>
+
+			<div class="theremin-xy-pad">
+				<div class="note-matrix"></div>
+				<div class="indicator"></div>
+			</div>
+		</theremin-app>
 
 		<script type="module" src="./script.js"></script>
 	</body>
