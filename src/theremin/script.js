@@ -95,7 +95,7 @@ class ThereminApp extends HTMLElement {
 			},
 			vibrato: {
 				base: {
-					frequency: 6,
+					frequency: 5,
 					amplitude: 2,
 				},
 				expression: {
@@ -167,15 +167,12 @@ class ThereminApp extends HTMLElement {
 
 			</div>
 			<div class="theremin-xy-pad">
-				<div class="label">Move mouse to play (L/R: pitch, U/D: volume)</div>
 
 
-				<div class="note-matrix">
-				</div>
 
-				<div class="indicator" style="top:50%;left:50%;">
-					<div class="indicator-label"></div>
-				</div>
+				<div class="note-matrix"></div>
+
+				<div class="indicator"></div>
 			</div>
 		`;
 
@@ -198,7 +195,6 @@ class ThereminApp extends HTMLElement {
 
 		this.thereminXYPad = this.querySelector('.theremin-xy-pad');
 		this.indicator = this.querySelector('.indicator');
-		this.indicatorLabel = this.querySelector('.indicator-label');
 
 		this.thereminXYPad.addEventListener('mousedown', this.handleMouseDown);
 		window.addEventListener('mouseup', this.handleMouseUp);
@@ -214,13 +210,11 @@ class ThereminApp extends HTMLElement {
 			this._currentGainMapped = this.linearInterpolation(this._currentGainMapped, this._targetGainMapped, 0.2);
 
 			if (this._lfo && this._lfoGain) {
-				this._lfo.frequency.setTargetAtTime(this._settings.vibrato.base.frequency, this._audioCtx.currentTime, 0.2);
+				this._lfo.frequency.setTargetAtTime(this._settings.vibrato.base.frequency, this._audioCtx.currentTime, 0.05);
 				this._lfoGain.gain.setTargetAtTime(this._settings.vibrato.base.amplitude, this._audioCtx.currentTime, 0.05);
 			}
 
-			console.log(this._lfoGain.gain.value);
-
-			this._oscillator.frequency.setTargetAtTime(this._targetFreq + (this._lfoGain ? this._lfoGain.gain.value : 0), this._audioCtx.currentTime, 0.05);
+			this._oscillator.frequency.setTargetAtTime(this._currentFreq, this._audioCtx.currentTime, 0.05);
 
 			this._gainNode.gain.setTargetAtTime(this._currentGainMapped, this._audioCtx.currentTime, 0.05);
 		}
@@ -269,8 +263,8 @@ class ThereminApp extends HTMLElement {
 			maxGain = 1.0;
 		const area = this.thereminXYPad;
 		const indicator = this.indicator;
-		const label = this.indicatorLabel;
-		if (!area || !indicator || !label) return;
+
+		if (!area || !indicator) return;
 		const width = area.clientWidth;
 		const height = area.clientHeight;
 
@@ -279,7 +273,6 @@ class ThereminApp extends HTMLElement {
 
 		indicator.style.left = `${x}px`;
 		indicator.style.top = `${y}px`;
-		label.textContent = `Freq: ${this._currentFreq.toFixed(1)} Hz, Gain: ${this._currentGain.toFixed(2)}`;
 	}
 
 	disconnectedCallback() {
