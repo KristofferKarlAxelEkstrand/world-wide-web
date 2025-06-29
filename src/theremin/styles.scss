@@ -189,3 +189,24 @@ theremin-app {
 	font-size: 0.85rem;
 	white-space: nowrap;
 }
+
+dial-knob {
+	display: inline-block;
+	vertical-align: middle;
+	width: 2rem;
+	height: 2rem;
+	> svg {
+		display: block;
+		width: 100%;
+		height: 100%;
+		touch-action: none;
+		user-select: none;
+
+		circle.svg-knob {
+			fill: rgb(37, 7, 30);
+		}
+		circle.svg-knob-dot {
+			fill: rgb(124, 102, 102);
+		}
+	}
+}

@@ -286,40 +286,33 @@ class ThereminApp extends HTMLElement {
 customElements.define('theremin-app', ThereminApp);
 
 class DialKnob extends HTMLElement {
-	static observedAttributes = ['min', 'max', 'step', 'value', 'sizeRem'];
+	static observedAttributes = ['min', 'max', 'step', 'value'];
 
 	#dragging = false;
 	#min = 0;
 	#max = 100;
 	#step = 1;
 	#value = 50;
-	#size = 32;
 	#svg = null;
-	#pointer = null;
+	#svgDot = null;
 	#startY = 0;
 	#startValue = 0;
 
 	constructor() {
 		super();
-		this.#size = (parseFloat(this.getAttribute('sizeRem')) || 2) * 16;
 		this.innerHTML = `
-			<style>
-				dial-knob { display: inline-block; }
-				dial-knob svg { touch-action: none; user-select: none; }
-			</style>
-			<svg width="${this.#size}" height="${this.#size}" viewBox="0 0 ${this.#size} ${this.#size}">
-				<circle cx="${this.#size / 2}" cy="${this.#size / 2}" r="${this.#size / 2 - 4}" fill="#222"/>
-				<rect id="pointer"
-					x="${this.#size / 2 - (this.#size * 0.08) / 2}"
-					y="${this.#size * 0.13}"
-					width="${this.#size * 0.08}"
-					height="${this.#size * 0.32}"
-					rx="${(this.#size * 0.08) / 2}"
+
+			<svg viewBox="0 0 128 128">
+				<circle cx="64" cy="64" r="64" class="svg-knob"/>
+				<circle id="dot" class="svg-knob-dot"
+					cx="64"
+					cy="24"
+					r="10"
 					fill="#fff"/>
 			</svg>
 		`;
 		this.#svg = this.querySelector('svg');
-		this.#pointer = this.querySelector('#pointer');
+		this.#svgDot = this.querySelector('#dot');
 		this.#svg.addEventListener('mousedown', this.#onDown);
 		this.#svg.addEventListener('touchstart', this.#onDown, { passive: false });
 		this.#updateFromAttributes();
@@ -350,7 +343,6 @@ class DialKnob extends HTMLElement {
 		this.#max = Number(this.getAttribute('max')) ?? 100;
 		this.#step = Number(this.getAttribute('step')) ?? 1;
 		this.#value = this.hasAttribute('value') ? Number(this.getAttribute('value')) : this.#value;
-		this.#size = (parseFloat(this.getAttribute('sizeRem')) || 2) * 16;
 	}
 
 	set value(val) {
@@ -393,10 +385,9 @@ class DialKnob extends HTMLElement {
 	};
 
 	#draw() {
-		const size = this.#size;
 		const t = (this.value - this.#min) / (this.#max - this.#min || 1);
 		const angle = -135 + t * 270;
-		this.#pointer.setAttribute('transform', `rotate(${angle} ${size / 2} ${size / 2})`);
+		this.#svgDot.setAttribute('transform', `rotate(${angle} 64 64)`);
 	}
 }
 customElements.define('dial-knob', DialKnob);
