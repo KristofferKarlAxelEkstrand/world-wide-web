@@ -4,10 +4,11 @@ function getNoteArray() {
 	const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 	const notes = [];
 	for (let midi = 12; midi <= 120; midi++) {
+		const arrayIndex = midi - 12;
 		const octave = Math.floor(midi / 12) - 1;
 		const name = noteNames[midi % 12] + octave;
 		const frequency = 440 * Math.pow(2, (midi - 69) / 12);
-		notes.push({ midi, name, frequency });
+		notes.push({ arrayIndex, midi, name, frequency });
 	}
 	return notes;
 }
@@ -51,59 +52,7 @@ class ThereminApp extends HTMLElement {
 
 		this.innerHTML = `
 			<style>
-				theremin-app {
-					display: block;
-					width: 100%;
-					height: 30rem;
-					overflow: hidden;
-				}
-				.theremin-xy-pad {
-					width: 100%;
-					height: 100%;
-					position: relative;
-					background-color:rgb(60, 64, 70);
-					cursor: crosshair;
-				}
-				.label {
-					position: absolute;
-					top: 10px;
-					left: 10px;
-					color: #fff;
-					font-family: sans-serif;
-					background: rgba(0,0,0,0.4);
-					padding: 4px 8px;
-					border-radius: 4px;
-					font-size: 1rem;
-					z-index: 10;
-				}
-				.indicator {
-					position: absolute;
-					width: 32px;
-					height: 32px;
-					border-radius: 50%;
-					background: rgba(255,255,255,0.7);
-					border: 2px solid #fff;
-					box-shadow: 0 0 8px #fff8;
-					display: flex;
-					align-items: center;
-					justify-content: center;
-					pointer-events: none;
-					transform: translate(-50%, -50%);
-					z-index: 20;
-				}
-				.indicator-label {
-					position: absolute;
-					top: 36px;
-					left: 50%;
-					transform: translateX(-50%);
-					color: #fff;
-					font-size: 0.85rem;
-					background: rgba(0,0,0,0.5);
-					padding: 2px 6px;
-					border-radius: 4px;
-					white-space: nowrap;
-					pointer-events: none;
-				}
+				
 			</style>
 			<div class="theremin-settings">
 				<div class="theremin-settings-group">
@@ -123,16 +72,34 @@ class ThereminApp extends HTMLElement {
 			</div>
 			<div class="theremin-xy-pad">
 				<div class="label">Move mouse to play (L/R: pitch, U/D: volume)</div>
+
+
+				<div class="note-matrix">
+				</div>
+
 				<div class="indicator" style="top:50%;left:50%;">
 					<div class="indicator-label"></div>
 				</div>
 			</div>
 		`;
+
+		// style="display:inline-block;margin:2px;padding:2px 6px;background:#222;color:#fff;border-radius:3px;font-size:0.85rem;"
 	}
 
 	linearInterpolation = (a, b, t) => a + (b - a) * t;
 
 	connectedCallback() {
+		// Render note matrix based on settings.range.min and settings.range.max
+		const noteMatrix = this.querySelector('.note-matrix');
+		if (noteMatrix) {
+			const minMidi = this._settings.range.min.midi;
+			const maxMidi = this._settings.range.max.midi;
+			const notesInRange = this._notes.filter((n) => n.midi >= minMidi && n.midi <= maxMidi);
+			noteMatrix.innerHTML = notesInRange.map((n) => `<div class="note" data-midi="${n.midi}" data-note="${n.name}" >${n.name}</div>`).join('');
+		}
+
+		console.log('ThereminApp notes:', this._notes);
+
 		this.thereminXYPad = this.querySelector('.theremin-xy-pad');
 		this.indicator = this.querySelector('.indicator');
 		this.indicatorLabel = this.querySelector('.indicator-label');

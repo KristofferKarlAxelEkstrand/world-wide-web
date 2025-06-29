@@ -1,20 +1,18 @@
 <!doctype html>
 <html lang="en">
 	<head>
-		<meta charset="UTF-8"/>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>3D Card</title>
 	</head>
 	<body>
-
 		<section>
 			<h1>Pop Over</h1>
 			<p>A <strong>popover</strong> is a small overlay that appears on top of the main content, typically used to display additional information or actions related to a specific element.</p>
 			<p>With modern CSS, you can now create popovers natively using the <code>popover</code> attribute, without needing any JavaScript or external libraries. This makes popovers easier to implement, more accessible, and better integrated with browsers.</p>
 			<p>Popovers are useful for notifications, tooltips, menus, or any UI element that needs to temporarily draw attention without navigating away from the current page.</p>
 			<p>Click the button to open the popover. Click the button inside the popover to close it.</p>
-			<p>
-				<strong>How is this different from a dialog?</strong> Unlike the <code>&lt;dialog&gt;</code> element, which is typically modal and blocks interaction with the rest of the page, a popover is non-modal by default and is anchored to a specific element. Popovers allow users to continue interacting with the page outside the popover, making them ideal for lightweight, contextual UI elements.</p>
+			<p><strong>How is this different from a dialog?</strong> Unlike the <code>&lt;dialog&gt;</code> element, which is typically modal and blocks interaction with the rest of the page, a popover is non-modal by default and is anchored to a specific element. Popovers allow users to continue interacting with the page outside the popover, making them ideal for lightweight, contextual UI elements.</p>
 			<p>
 				<button popovertarget="notifications">Click me</button>
 			</p>
@@ -23,7 +21,6 @@
 				<p>You have 3 new messages.</p>
 				<button popovertarget="notifications" popoverclose>Close</button>
 			</div>
-
 		</section>
 
 		<script type="module" src="./script.js"></script>

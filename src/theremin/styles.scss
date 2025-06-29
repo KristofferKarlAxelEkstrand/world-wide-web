@@ -27,135 +27,141 @@ section {
 	padding: 4em;
 }
 
-quantity-selector {
+theremin-app {
+	display: block;
+	width: 100%;
+	height: 30rem;
+	overflow: hidden;
+}
+
+.theremin-xy-pad {
+	position: relative;
+	cursor: crosshair;
+	background-color: rgb(60, 64, 70);
+	width: 100%;
+	height: 100%;
+}
+
+.label {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	z-index: 10;
+	border-radius: 4px;
+	background: rgba(0, 0, 0, 0.4);
+	padding: 4px 8px;
+	color: #fff;
+	font-size: 1rem;
+	font-family: sans-serif;
+}
+
+.indicator {
 	display: flex;
+	position: absolute;
+	justify-content: center;
 	align-items: center;
-	border: 2px solid #000000;
-	border-radius: 0.2rem;
+	transform: translate(-50%, -50%);
+	z-index: 20;
+	box-shadow: 0 0 8px #fff8;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.7);
+	width: 32px;
+	height: 32px;
+	pointer-events: none;
+}
 
-	> button.quantity-decrease,
-	> button.quantity-increase {
-		cursor: pointer;
-		border: none;
-		border-radius: 0;
-		background-color: #666666;
-		padding: 0.5em 1em;
-		color: #fff;
-	}
+.indicator-label {
+	position: absolute;
+	top: 36px;
+	left: 50%;
+	transform: translateX(-50%);
+	border-radius: 4px;
+	background: rgba(0, 0, 0, 0.5);
+	padding: 2px 6px;
+	pointer-events: none;
+	color: #fff;
+	font-size: 0.85rem;
+	white-space: nowrap;
+}
 
-	input {
-		display: inline;
-		flex-grow: 0;
-		box-sizing: border-box; /* Include padding and border in the element's total width */
-		border: none;
-		border-radius: 0;
-		background-color: #303030;
-		padding: 0.5em 0;
-		width: auto;
-		min-width: 1em;
-		max-width: 20em;
-
-		color: #bbbbbb;
-		text-align: center;
-	}
-
-	.add-to-cart {
+.note-matrix {
+	display: flex;
+	gap: 0;
+	opacity: 0.05;
+	height: 100%;
+	pointer-events: none;
+	> div {
+		flex: 1;
 		flex-grow: 1;
 		cursor: pointer;
 		border: none;
-		border-radius: 0;
-		background-color: #000000;
-		padding: 0.5em 1em;
-		color: #fff;
-		text-align: left;
-		white-space: nowrap;
-	}
-}
-
-product-card-list {
-	display: grid;
-
-	gap: 1em;
-
-	product-card {
-		display: flex;
-		flex-direction: column;
-		justify-content: start;
-		border-radius: 0.3em;
-		background-color: blueviolet;
+		background-color: #f9f9f9;
+		padding: 0;
 		overflow: hidden;
+		pointer-events: none;
+		text-align: center;
 
-		> picture {
-			display: flex;
-			position: relative;
-			justify-content: center;
-			align-items: center;
-			background-color: #c7c7c7;
-			padding-top: 100%;
-			width: 100%;
-			height: 0;
-			overflow: hidden;
-
-			> img {
-				position: absolute;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-				object-fit: cover;
-			}
+		&[data-note^='C'] {
+			background-color: #ffffff;
+			color: #ffffff;
+			font-weight: bold;
+		}
+		&[data-note^='C#'] {
+			background-color: #000000;
+			color: #000000;
+			font-weight: bold;
+		}
+		&[data-note^='D'] {
+			background-color: #ffffff;
+			color: #ffffff;
+			font-weight: bold;
+		}
+		&[data-note^='D#'] {
+			background-color: #000000;
+			color: #000000;
+			font-weight: bold;
 		}
 
-		> .content {
-			background-color: #ccd8bec2;
-			padding: 1em;
-			color: #333;
-
-			> h2 {
-				margin: 0;
-				font-size: 1em;
-			}
-
-			> p {
-				margin: 0;
-				font-size: 1em;
-			}
+		&[data-note^='E'] {
+			background-color: #ffffff;
+			color: #ffffff;
+			font-weight: bold;
 		}
-	}
-}
-
-product-card-list {
-	display: grid;
-	grid-template-columns: repeat(1, 1fr);
-	gap: 1em;
-}
-
-@media (min-width: 650px) {
-	product-card-list {
-		grid-template-columns: repeat(2, 1fr);
-	}
-}
-
-@media (min-width: 900px) {
-	product-card-list {
-		grid-template-columns: repeat(3, 1fr);
-	}
-}
-
-@media (min-width: 1300px) {
-	product-card-list {
-		grid-template-columns: repeat(4, 1fr);
-	}
-}
-
-@media (min-width: 1500px) {
-	product-card-list {
-		grid-template-columns: repeat(5, 1fr);
-	}
-}
-
-@media (min-width: 1700px) {
-	product-card-list {
-		grid-template-columns: repeat(6, 1fr);
+		&[data-note^='F'] {
+			background-color: #ffffff;
+			color: #ffffff;
+			font-weight: bold;
+		}
+		&[data-note^='F#'] {
+			background-color: #000000;
+			color: #000000;
+			font-weight: bold;
+		}
+		&[data-note^='G'] {
+			background-color: #ffffff;
+			color: #ffffff;
+			font-weight: bold;
+		}
+		&[data-note^='G#'] {
+			background-color: #000000;
+			color: #000000;
+			font-weight: bold;
+		}
+		&[data-note^='A'] {
+			background-color: #ffffff;
+			color: #ffffff;
+			font-weight: bold;
+		}
+		&[data-note^='A#'] {
+			background-color: #000000;
+			color: #000000;
+			font-weight: bold;
+		}
+		&[data-note^='B'] {
+			background-color: #ffffff;
+			color: #ffffff;
+			font-weight: bold;
+		}
 	}
 }
