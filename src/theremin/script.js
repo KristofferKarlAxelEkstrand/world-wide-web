@@ -28,6 +28,59 @@ class ThereminApp extends HTMLElement {
 	_currentGain = 0;
 	_currentGainMapped = 0;
 
+	_lfo = null;
+	_lfoGain = null;
+
+	setupLFO() {
+		if (!this._audioCtx) return;
+		this._lfo = this._audioCtx.createOscillator();
+		this._lfoGain = this._audioCtx.createGain();
+
+		const vibrato = this._settings.vibrato.base;
+		this._lfo.type = 'sine';
+		this._lfo.frequency.value = vibrato.frequency;
+		this._lfoGain.gain.value = vibrato.amplitude * 50;
+
+		this._lfo.connect(this._lfoGain);
+		this._lfoGain.connect(this._oscillator.frequency);
+		this._lfo.start();
+	}
+
+	stopLFO() {
+		if (this._lfo) {
+			this._lfo.stop();
+			this._lfo.disconnect();
+			this._lfo = null;
+		}
+		if (this._lfoGain) {
+			this._lfoGain.disconnect();
+			this._lfoGain = null;
+		}
+	}
+
+	startOscillator() {
+		if (this._oscillator) return;
+		this._oscillator = this._audioCtx.createOscillator();
+		this._gainNode = this._audioCtx.createGain();
+		this._oscillator.type = 'sawtooth';
+		this._oscillator.connect(this._gainNode);
+		this._gainNode.connect(this._audioCtx.destination);
+		this._gainNode.gain.value = 0;
+		this._oscillator.start();
+		this.setupLFO();
+	}
+
+	// Override stopOscillator to clean up LFO
+	stopOscillator() {
+		if (!this._oscillator) return;
+		this.stopLFO();
+		this._oscillator.stop();
+		this._oscillator.disconnect();
+		this._gainNode.disconnect();
+		this._oscillator = null;
+		this._gainNode = null;
+	}
+
 	constructor() {
 		super();
 
