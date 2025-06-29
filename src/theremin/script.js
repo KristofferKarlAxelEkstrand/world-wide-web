@@ -1,5 +1,19 @@
 import './styles.scss';
 
+function getNoteArray() {
+	const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+	const notes = [];
+
+	for (let midi = 12; midi <= 120; midi++) {
+		const octave = Math.floor(midi / 12) - 1;
+		const name = noteNames[midi % 12] + octave;
+		const frequency = 440 * Math.pow(2, (midi - 69) / 12);
+		notes.push({ midi, name, frequency });
+	}
+
+	return notes;
+}
+
 class ThereminApp extends HTMLElement {
 	_audioCtx = null;
 	oscillator = null;
@@ -18,15 +32,17 @@ class ThereminApp extends HTMLElement {
 			<style>
 				:host {
 					display: block;
-					width: 100vw;
-					height: 100vh;
+					width: 100%;
+					height: 30rem;
+		
+
 					overflow: hidden;
 				}
 				.theremin-area {
-					width: 100vw;
-					height: 100vh;
+					width: 100%;
+					height: 100%;
 					position: relative;
-					background: linear-gradient(135deg, #222 60%, #444 100%);
+					background-color: #ff3300;
 					cursor: crosshair;
 				}
 				.label {
@@ -89,7 +105,7 @@ class ThereminApp extends HTMLElement {
 		window.addEventListener('mouseup', this.handleMouseUp);
 
 		this._updateTarget = (x, y, width, height) => {
-			const minFreq = 40,
+			const minFreq = 16.35,
 				maxFreq = 2000;
 			this._targetFreq = minFreq + (x / width) * (maxFreq - minFreq);
 
@@ -107,8 +123,8 @@ class ThereminApp extends HTMLElement {
 
 		const animate = () => {
 			if (this.oscillator && this.gainNode) {
-				this._currentFreq = this.lerp(this._currentFreq, this._targetFreq, 0.1);
-				this._currentGain = this.lerp(this._currentGain, this._targetGain, 0.1);
+				this._currentFreq = this.lerp(this._currentFreq, this._targetFreq, 0.2);
+				this._currentGain = this.lerp(this._currentGain, this._targetGain, 0.2);
 				this.oscillator.frequency.setTargetAtTime(this._targetFreq, this._audioCtx.currentTime, 0.05);
 				this.gainNode.gain.setTargetAtTime(this._targetGain, this._audioCtx.currentTime, 0.05);
 			}
