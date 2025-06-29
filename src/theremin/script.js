@@ -168,10 +168,7 @@ class ThereminApp extends HTMLElement {
 			</div>
 			<div class="theremin-xy-pad">
 
-
-
 				<div class="note-matrix"></div>
-
 				<div class="indicator"></div>
 			</div>
 		`;
