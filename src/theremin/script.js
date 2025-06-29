@@ -76,7 +76,7 @@ class ThereminApp extends HTMLElement {
 		};
 
 		this._updateTarget = (x, y, width, height) => {
-			const minFreq = 200;
+			const minFreq = 40;
 			const maxFreq = 2000;
 			this._targetFreq = minFreq + (x / width) * (maxFreq - minFreq);
 
@@ -141,10 +141,6 @@ class ThereminApp extends HTMLElement {
 	handleMouseUp(e) {
 		this.thereminArea.removeEventListener('mousemove', this.handleMouseMove);
 		window.removeEventListener('mousemove', this.handleMouseMove);
-
-		if (this.gainNode && this._audioCtx) {
-			this.gainNode.gain.value = 0;
-		}
 	}
 }
 
