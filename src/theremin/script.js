@@ -46,7 +46,11 @@ class ThereminApp extends HTMLElement {
 			},
 			range: {
 				min: this.#notes[12],
-				max: this.#notes[88],
+				max: this.#notes[49],
+			},
+			rangeHz: {
+				min: 0,
+				max: 0,
 			},
 			smoothingFactors: {
 				pitch: 0.2,
@@ -74,8 +78,6 @@ class ThereminApp extends HTMLElement {
 			this.#settings[group][name] = value;
 		}
 		this.#settings[group][name] = value;
-		console.log(`Setting updated: ${group}.${name} = ${value}`);
-		console.log('Current settings:', this.#settings);
 	}
 
 	setupLFO() {
@@ -132,9 +134,8 @@ class ThereminApp extends HTMLElement {
 	linearInterpolation = (a, b, t) => a + (b - a) * t;
 
 	connectedCallback() {
+		this._updateRange();
 		this._updateNoteMatrix();
-
-		console.log('ThereminApp notes:', this.#notes);
 
 		this.thereminXYPad = this.querySelector('.theremin-xy-pad');
 		this.indicator = this.querySelector('.indicator');
@@ -149,6 +150,7 @@ class ThereminApp extends HTMLElement {
 		if (this.#noteMatrix) {
 			const minMidi = this.#settings.range.min.midi;
 			const maxMidi = this.#settings.range.max.midi;
+
 			const notesInRange = this.#notes.filter((n) => n.midi >= minMidi && n.midi <= maxMidi);
 			this.#noteMatrix.innerHTML = notesInRange.map((n) => `<div class="note" data-midi="${n.midi}" data-note="${n.name}" ></div>`).join('');
 		}
@@ -166,10 +168,7 @@ class ThereminApp extends HTMLElement {
 			const vibratoFreq = this.#settings.vibrato.frequency * (1 - mixRatio) + this.#settings.vibratoExpression.frequency * mixRatio;
 			const vibratoAmplitude = this.#settings.vibrato.amplitude * (1 - mixRatio) + this.#settings.vibratoExpression.amplitude * mixRatio;
 
-			console.log('Current settings:', mixRatio);
-
 			if (this.#lfo && this.#lfoGain) {
-				console.log('Updating LFO settings:', this.#settings.vibrato);
 				this.#lfo.frequency.setTargetAtTime(vibratoFreq, this.#audioCtx.currentTime, 0.05);
 				this.#lfoGain.gain.setTargetAtTime(vibratoAmplitude, this.#audioCtx.currentTime, 0.05);
 			}
@@ -182,11 +181,17 @@ class ThereminApp extends HTMLElement {
 		this.#animationFrameId = requestAnimationFrame(this.animate);
 	};
 
-	_updateTarget = (x, y, width, height) => {
-		const minFreq = this.#settings.range.min.frequency,
-			maxFreq = this.#settings.range.max.frequency;
+	_updateRange = () => {
+		const minNoteIdx = this.#settings.range.min.arrayIndex;
+		const maxNoteIdx = this.#settings.range.max.arrayIndex;
+		const minIdx = Math.max(0, minNoteIdx - 1);
+		const maxIdx = Math.min(this.#notes.length - 1, maxNoteIdx + 1);
+		this.#settings.rangeHz.min = (this.#notes[minIdx].frequency + this.#notes[minNoteIdx].frequency) / 2;
+		this.#settings.rangeHz.max = (this.#notes[maxNoteIdx].frequency + this.#notes[maxIdx].frequency) / 2;
+	};
 
-		this.#targetFreq = minFreq + (x / width) * (maxFreq - minFreq);
+	_updateTarget = (x, y, width, height) => {
+		this.#targetFreq = this.#settings.rangeHz.min + (x / width) * (this.#settings.rangeHz.max - this.#settings.rangeHz.min);
 
 		const minGain = 0.01,
 			maxGain = 1.0;
@@ -212,13 +217,10 @@ class ThereminApp extends HTMLElement {
 		if (y < 0) y = 0;
 		if (y > rect.height) y = rect.height;
 
-		console.log(x, y, rect.height, rect.width);
 		this._updateTarget(x, y, rect.width, rect.height);
 	};
 
 	updateIndicator() {
-		const minFreq = this.#settings.range.min.frequency,
-			maxFreq = this.#settings.range.max.frequency;
 		const minGain = 0,
 			maxGain = 1.0;
 		const area = this.thereminXYPad;
@@ -228,7 +230,7 @@ class ThereminApp extends HTMLElement {
 		const width = area.clientWidth;
 		const height = area.clientHeight;
 
-		const x = ((this.#currentFreq - minFreq) / (maxFreq - minFreq)) * width;
+		const x = ((this.#currentFreq - this.#settings.rangeHz.min) / (this.#settings.rangeHz.max - this.#settings.rangeHz.min)) * width;
 		const y = ((maxGain - this.#currentGain) / (maxGain - minGain)) * height;
 
 		indicator.style.left = `${x}px`;
@@ -245,8 +247,6 @@ class ThereminApp extends HTMLElement {
 	}
 
 	handleMouseDown = (e) => {
-		console.log('Mouse down on theremin area', e, this.#settings);
-
 		if (!this.#audioCtx) {
 			const AudioCtx = window.AudioContext || window['webkitAudioContext'];
 			this.#audioCtx = new AudioCtx();
