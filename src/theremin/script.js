@@ -21,14 +21,14 @@ class ThereminApp extends HTMLElement {
 
 	#animationFrameId = null;
 
-	#targetFreq = 440;
-	#currentFreq = 440;
+	#targetFreq = 0;
+	#currentFreq = 0;
 
-	#targetGain = 0.5;
-	#currentGain = 0.5;
+	#targetGain = 0;
+	#currentGain = 0;
 
-	#targetGainMapped = 0.5;
-	#currentGainMapped = 0.5;
+	#targetGainMapped = 0;
+	#currentGainMapped = 0;
 
 	#lfo = null;
 	#lfoGain = null;
@@ -46,21 +46,24 @@ class ThereminApp extends HTMLElement {
 			},
 			range: {
 				min: this.#notes[12],
-				max: this.#notes[48],
+				max: this.#notes[88],
 			},
 			smoothingFactors: {
-				frequency: 0.2,
+				pitch: 0.2,
 				gain: 0.2,
 			},
 			vibrato: {
-				frequency: 5,
-				amplitude: 2,
+				frequency: 6.7,
+				amplitude: 3,
 			},
 			vibratoExpression: {
 				frequency: 5,
-				amplitude: 2,
+				amplitude: 12.6,
 			},
 		};
+
+		this.#targetFreq = (this.#settings.range.min.frequency + this.#settings.range.max.frequency) / 2;
+		this.#currentFreq = (this.#settings.range.min.frequency + this.#settings.range.max.frequency) / 2;
 	}
 
 	updateSetting({ value, group, name }) {
@@ -105,11 +108,13 @@ class ThereminApp extends HTMLElement {
 	startOscillator() {
 		if (this.#oscillator) return;
 		this.#oscillator = this.#audioCtx.createOscillator();
+		this.#oscillator.frequency.value = this.#currentFreq;
 		this.#gainNode = this.#audioCtx.createGain();
 		this.#oscillator.type = 'sawtooth';
 		this.#oscillator.connect(this.#gainNode);
 		this.#gainNode.connect(this.#audioCtx.destination);
 		this.#gainNode.gain.value = 0;
+
 		this.#oscillator.start();
 		this.setupLFO();
 	}
@@ -151,15 +156,22 @@ class ThereminApp extends HTMLElement {
 
 	animate = () => {
 		if (this.#oscillator && this.#gainNode) {
-			this.#currentFreq = this.linearInterpolation(this.#currentFreq, this.#targetFreq, 0.2);
-			this.#currentGain = this.linearInterpolation(this.#currentGain, this.#targetGain, 0.2);
+			this.#currentFreq = this.linearInterpolation(this.#currentFreq, this.#targetFreq, 1 - this.#settings.smoothingFactors.pitch);
+			this.#currentGain = this.linearInterpolation(this.#currentGain, this.#targetGain, 1 - this.#settings.smoothingFactors.gain);
 
-			this.#currentGainMapped = this.linearInterpolation(this.#currentGainMapped, this.#targetGainMapped, 0.2);
+			this.#currentGainMapped = this.linearInterpolation(this.#currentGainMapped, this.#targetGainMapped, 1 - this.#settings.smoothingFactors.gain);
+
+			const mixRatio = this.#currentGain <= 0.7 ? 0 : (this.#currentGain - 0.7) / 0.3;
+
+			const vibratoFreq = this.#settings.vibrato.frequency * (1 - mixRatio) + this.#settings.vibratoExpression.frequency * mixRatio;
+			const vibratoAmplitude = this.#settings.vibrato.amplitude * (1 - mixRatio) + this.#settings.vibratoExpression.amplitude * mixRatio;
+
+			console.log('Current settings:', mixRatio);
 
 			if (this.#lfo && this.#lfoGain) {
 				console.log('Updating LFO settings:', this.#settings.vibrato);
-				this.#lfo.frequency.setTargetAtTime(this.#settings.vibrato.frequency, this.#audioCtx.currentTime, 0.05);
-				this.#lfoGain.gain.setTargetAtTime(this.#settings.vibrato.amplitude, this.#audioCtx.currentTime, 0.05);
+				this.#lfo.frequency.setTargetAtTime(vibratoFreq, this.#audioCtx.currentTime, 0.05);
+				this.#lfoGain.gain.setTargetAtTime(vibratoAmplitude, this.#audioCtx.currentTime, 0.05);
 			}
 
 			this.#oscillator.frequency.setTargetAtTime(this.#currentFreq, this.#audioCtx.currentTime, 0.05);
@@ -347,6 +359,7 @@ class DialKnob extends HTMLElement {
 		window.addEventListener('touchmove', this.#onMove, { passive: false });
 		window.addEventListener('touchend', this.#onUp);
 	};
+
 	#onMove = (e) => {
 		if (!this.#dragging) return;
 		const y = (e.touches ? e.touches[0] : e).clientY;
@@ -355,6 +368,7 @@ class DialKnob extends HTMLElement {
 		v = Math.max(this.#min, Math.min(this.#max, v));
 		this.value = v;
 	};
+
 	#onUp = () => {
 		this.#dragging = false;
 		window.removeEventListener('mousemove', this.#onMove);
