@@ -172,8 +172,6 @@ class ThereminApp extends HTMLElement {
 				<div class="indicator"></div>
 			</div>
 		`;
-
-		// style="display:inline-block;margin:2px;padding:2px 6px;background:#222;color:#fff;border-radius:3px;font-size:0.85rem;"
 	}
 
 	linearInterpolation = (a, b, t) => a + (b - a) * t;
