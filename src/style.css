@@ -1,0 +1,133 @@
+:root {
+  --green: #00a651;
+  --white: #ffffff;
+  --black: #494949;
+  --black-light: #8f8f8f;
+  --padding: 1rem;
+}
+@media (min-width: 340px) {
+  :root {
+    --padding: 2rem;
+  }
+}
+@media (min-width: 500px) {
+  :root {
+    --padding: 3rem;
+  }
+}
+@media (min-width: 600px) {
+  :root {
+    --padding: 4rem;
+  }
+}
+
+html {
+  box-sizing: border-box;
+  min-height: 100dvh;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  background-color: var(--white);
+  padding: 0;
+  min-height: 100dvh;
+  color: #333;
+  font-size: 16px;
+  line-height: 1.5;
+  font-family: "Roboto", sans-serif;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+header {
+  background-color: var(--white);
+  padding: var(--padding);
+  color: var(--black-light);
+  text-align: center;
+}
+header > img {
+  margin: 0 0 1rem 0;
+  padding: 0;
+}
+header > p {
+  margin: 0;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 32rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+main {
+  flex-grow: 1;
+  background-color: var(--green);
+  padding: var(--padding);
+}
+main > ul {
+  display: grid;
+  grid-template: auto/repeat(auto-fill, 1fr);
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 500px) {
+  main > ul {
+    grid-template: auto/repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+main > ul li {
+  margin: 0;
+  padding: 0;
+}
+main > ul li a {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: transform 0.1s, box-shadow 0.1s;
+  margin: 0;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0.21);
+  border-radius: 0.5rem;
+  background-color: var(--white);
+  padding: 1rem;
+  min-height: 100%;
+  color: var(--black);
+  text-decoration: none;
+}
+main > ul li a:hover {
+  transform: translateY(-0.2rem);
+  box-shadow: 0 0.2rem 0 0 rgba(0, 0, 0, 0.21);
+}
+main > ul li a:active {
+  transform: translateY(0);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0.21);
+}
+main > ul li a > h2 {
+  margin: 0 0 0.5rem 0;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+}
+main > ul li a > p {
+  margin: 0;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+main > ul li a > :first-child {
+  margin-top: 0;
+}
+main > ul li a > :last-child {
+  margin-bottom: 0;
+}

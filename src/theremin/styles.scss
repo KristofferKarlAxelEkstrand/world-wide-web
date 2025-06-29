@@ -1,0 +1,161 @@
+@use '_include-media.scss';
+
+:root {
+	--primary-color: #000000;
+	--secondary-color: #666666;
+	--tertiary-color: #ffffff;
+	--background-color: #f5f5f5;
+}
+
+html {
+	box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+	box-sizing: inherit;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	font-family: 'Roboto', sans-serif;
+}
+
+section {
+	padding: 4em;
+}
+
+quantity-selector {
+	display: flex;
+	align-items: center;
+	border: 2px solid #000000;
+	border-radius: 0.2rem;
+
+	> button.quantity-decrease,
+	> button.quantity-increase {
+		cursor: pointer;
+		border: none;
+		border-radius: 0;
+		background-color: #666666;
+		padding: 0.5em 1em;
+		color: #fff;
+	}
+
+	input {
+		display: inline;
+		flex-grow: 0;
+		box-sizing: border-box; /* Include padding and border in the element's total width */
+		border: none;
+		border-radius: 0;
+		background-color: #303030;
+		padding: 0.5em 0;
+		width: auto;
+		min-width: 1em;
+		max-width: 20em;
+
+		color: #bbbbbb;
+		text-align: center;
+	}
+
+	.add-to-cart {
+		flex-grow: 1;
+		cursor: pointer;
+		border: none;
+		border-radius: 0;
+		background-color: #000000;
+		padding: 0.5em 1em;
+		color: #fff;
+		text-align: left;
+		white-space: nowrap;
+	}
+}
+
+product-card-list {
+	display: grid;
+
+	gap: 1em;
+
+	product-card {
+		display: flex;
+		flex-direction: column;
+		justify-content: start;
+		border-radius: 0.3em;
+		background-color: blueviolet;
+		overflow: hidden;
+
+		> picture {
+			display: flex;
+			position: relative;
+			justify-content: center;
+			align-items: center;
+			background-color: #c7c7c7;
+			padding-top: 100%;
+			width: 100%;
+			height: 0;
+			overflow: hidden;
+
+			> img {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+			}
+		}
+
+		> .content {
+			background-color: #ccd8bec2;
+			padding: 1em;
+			color: #333;
+
+			> h2 {
+				margin: 0;
+				font-size: 1em;
+			}
+
+			> p {
+				margin: 0;
+				font-size: 1em;
+			}
+		}
+	}
+}
+
+product-card-list {
+	display: grid;
+	grid-template-columns: repeat(1, 1fr);
+	gap: 1em;
+}
+
+@media (min-width: 650px) {
+	product-card-list {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (min-width: 900px) {
+	product-card-list {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+@media (min-width: 1300px) {
+	product-card-list {
+		grid-template-columns: repeat(4, 1fr);
+	}
+}
+
+@media (min-width: 1500px) {
+	product-card-list {
+		grid-template-columns: repeat(5, 1fr);
+	}
+}
+
+@media (min-width: 1700px) {
+	product-card-list {
+		grid-template-columns: repeat(6, 1fr);
+	}
+}

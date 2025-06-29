@@ -7,12 +7,13 @@
 		"dev": "npm run start-page && vite",
 		"build": "npm run start-page && vite build",
 		"format": "prettier --write .",
-		"start-page": "node dir.js"
+		"start-page": "node dir.js",
+		"watch:scss": "sass src:src --no-source-map --watch"
 	},
 	"devDependencies": {
 		"prettier": "^3.5.3",
 		"prettier-plugin-css-order": "^2.1.2",
-		"sass-embedded": "^1.89.1",
+		"sass": "^1.69.7",
 		"vite": "^6.3.5"
 	}
 }

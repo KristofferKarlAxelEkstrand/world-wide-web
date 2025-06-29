@@ -1,0 +1,5 @@
+{
+	"name": "Theremin",
+	"version": "1.0.0",
+	"description": "A playful, browser-based musical instrument that mimics the behavior of a classic Theremin. This project uses the Web Audio API to generate real-time sound based on pointer or touch position. Horizontal movement controls pitch (frequency), while vertical movement controls volume (amplitude)—just like a physical Theremin, but playable on any modern device with a screen."
+}

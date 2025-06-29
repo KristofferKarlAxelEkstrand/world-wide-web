@@ -106,23 +106,42 @@ class synthGui extends HTMLElement {
 	constructor() {
 		super();
 		this.synth = new MidiSynth({ midiInterface: this });
-		this.notes = [];
-
 		this.userHasInteracted = false;
+		this.keys = [];
+		for (let note = 48; note <= 59; note++) {
+			const btn = document.createElement('button');
+			btn.setAttribute('data-note', note);
+			this.keys.push(btn);
+		}
+		this.keyBed = document.createElement('div');
 	}
 
 	connectedCallback() {
-		for (let note = 48; note <= 59; note++) {
-			const btn = document.createElement('button');
-			btn.setAttribute('data-note-nr', note);
-			this.notes.push(btn);
-		}
 		window.addEventListener('pointerdown', this.onUserGesture);
 		window.addEventListener('keydown', this.onUserGesture);
 		this.render();
 	}
 
-	render() {}
+	render() {
+		this.keys.forEach((btn, idx) => {
+			btn.classList.add('key');
+
+			btn.addEventListener('pointerdown', () => {
+				if (this.userHasInteracted) {
+					this.synth.noteOn(parseInt(btn.getAttribute('data-note')));
+				}
+			});
+			btn.addEventListener('pointerup', () => {
+				if (this.userHasInteracted) {
+					this.synth.noteOff(parseInt(btn.getAttribute('data-note')));
+				}
+			});
+			this.keyBed.appendChild(btn);
+		});
+		this.keyBed.classList.add('key-bed');
+
+		this.appendChild(this.keyBed);
+	}
 
 	onUserGesture() {
 		this.userHasInteracted = true;
