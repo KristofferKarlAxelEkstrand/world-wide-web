@@ -95,12 +95,12 @@ class ThereminApp extends HTMLElement {
 			},
 			vibrato: {
 				base: {
-					frequency: 5,
-					amplitude: 0.1,
+					frequency: 6,
+					amplitude: 2,
 				},
 				expression: {
-					frequency: 5,
-					amplitude: 0.1,
+					frequency: 6,
+					amplitude: 5,
 				},
 			},
 		};
@@ -213,7 +213,14 @@ class ThereminApp extends HTMLElement {
 
 			this._currentGainMapped = this.linearInterpolation(this._currentGainMapped, this._targetGainMapped, 0.2);
 
-			this._oscillator.frequency.setTargetAtTime(this._targetFreq, this._audioCtx.currentTime, 0.05);
+			if (this._lfo && this._lfoGain) {
+				this._lfo.frequency.setTargetAtTime(this._settings.vibrato.base.frequency, this._audioCtx.currentTime, 0.2);
+				this._lfoGain.gain.setTargetAtTime(this._settings.vibrato.base.amplitude, this._audioCtx.currentTime, 0.05);
+			}
+
+			console.log(this._lfoGain.gain.value);
+
+			this._oscillator.frequency.setTargetAtTime(this._targetFreq + (this._lfoGain ? this._lfoGain.gain.value : 0), this._audioCtx.currentTime, 0.05);
 
 			this._gainNode.gain.setTargetAtTime(this._currentGainMapped, this._audioCtx.currentTime, 0.05);
 		}
@@ -288,7 +295,7 @@ class ThereminApp extends HTMLElement {
 		console.log('Mouse down on theremin area', e, this._settings);
 
 		if (!this._audioCtx) {
-			const AudioCtx = window.AudioContext || window?.webkitAudioContext;
+			const AudioCtx = window.AudioContext || window['webkitAudioContext'];
 			this._audioCtx = new AudioCtx();
 			this.startOscillator();
 		} else if (this._audioCtx.state === 'suspended') {
@@ -299,25 +306,7 @@ class ThereminApp extends HTMLElement {
 		this.handleMouseMove(e);
 	};
 
-	startOscillator() {
-		if (this._oscillator) return;
-		this._oscillator = this._audioCtx.createOscillator();
-		this._gainNode = this._audioCtx.createGain();
-		this._oscillator.type = 'sawtooth';
-		this._oscillator.connect(this._gainNode);
-		this._gainNode.connect(this._audioCtx.destination);
-		this._gainNode.gain.value = 0;
-		this._oscillator.start();
-	}
-
-	stopOscillator() {
-		if (!this._oscillator) return;
-		this._oscillator.stop();
-		this._oscillator.disconnect();
-		this._gainNode.disconnect();
-		this._oscillator = null;
-		this._gainNode = null;
-	}
+	// (Removed duplicate startOscillator and stopOscillator methods)
 
 	handleMouseUp = () => {
 		this.thereminXYPad.removeEventListener('mousemove', this.handleMouseMove);
