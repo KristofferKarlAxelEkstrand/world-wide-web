@@ -32,14 +32,36 @@ theremin-app {
 	width: 100%;
 	height: 30rem;
 	overflow: hidden;
-}
 
-.theremin-xy-pad {
-	position: relative;
-	cursor: crosshair;
-	background-color: rgb(60, 64, 70);
-	width: 100%;
-	height: 100%;
+	> .theremin-settings {
+		display: flex;
+		flex-direction: row;
+		gap: 1rem;
+
+		> .theremin-settings-group {
+			display: flex;
+			flex-direction: row;
+			gap: 0.5rem;
+			width: 100%;
+			max-width: 20rem;
+
+			> label {
+				margin-bottom: 0.25rem;
+				color: var(--secondary-color);
+				font-size: 0.9rem;
+			}
+
+			> input,
+			> select {
+				border: 1px solid var(--secondary-color);
+				border-radius: 4px;
+				background-color: var(--tertiary-color);
+				padding: 0.5rem;
+				width: 100%;
+				font-size: 1rem;
+			}
+		}
+	}
 }
 
 .label {
@@ -85,83 +107,92 @@ theremin-app {
 	white-space: nowrap;
 }
 
-.note-matrix {
-	display: flex;
-	gap: 0;
-	opacity: 0.05;
+.theremin-xy-pad {
+	position: relative;
+	cursor: crosshair;
+	background-color: rgb(60, 64, 70);
+	width: 100%;
 	height: 100%;
-	pointer-events: none;
-	> div {
-		flex: 1;
-		flex-grow: 1;
-		cursor: pointer;
-		border: none;
-		background-color: #f9f9f9;
-		padding: 0;
-		overflow: hidden;
+
+	.note-matrix {
+		display: flex;
+		gap: 0;
+		opacity: 0.05;
+		height: 100%;
 		pointer-events: none;
-		text-align: center;
+		user-select: none;
+		> div {
+			flex: 1;
+			flex-grow: 1;
+			border: none;
+			background-color: #f9f9f9;
+			padding: 0;
+			overflow: hidden;
+			pointer-events: none;
+			user-select: none;
+			text-align: center;
 
-		&[data-note^='C'] {
-			background-color: #ffffff;
-			color: #ffffff;
-			font-weight: bold;
-		}
-		&[data-note^='C#'] {
-			background-color: #000000;
-			color: #000000;
-			font-weight: bold;
-		}
-		&[data-note^='D'] {
-			background-color: #ffffff;
-			color: #ffffff;
-			font-weight: bold;
-		}
-		&[data-note^='D#'] {
-			background-color: #000000;
-			color: #000000;
-			font-weight: bold;
-		}
+			&[data-note^='C'] {
+				background-color: #ffffff;
+				color: #ffffff;
+				font-weight: bold;
+			}
+			&[data-note^='C#'] {
+				background-color: #000000;
+				color: #000000;
+				font-weight: bold;
+			}
+			&[data-note^='D'] {
+				background-color: #ffffff;
+				color: #ffffff;
+				font-weight: bold;
+			}
+			&[data-note^='D#'] {
+				background-color: #000000;
+				color: #000000;
+				font-weight: bold;
+			}
 
-		&[data-note^='E'] {
-			background-color: #ffffff;
-			color: #ffffff;
-			font-weight: bold;
-		}
-		&[data-note^='F'] {
-			background-color: #ffffff;
-			color: #ffffff;
-			font-weight: bold;
-		}
-		&[data-note^='F#'] {
-			background-color: #000000;
-			color: #000000;
-			font-weight: bold;
-		}
-		&[data-note^='G'] {
-			background-color: #ffffff;
-			color: #ffffff;
-			font-weight: bold;
-		}
-		&[data-note^='G#'] {
-			background-color: #000000;
-			color: #000000;
-			font-weight: bold;
-		}
-		&[data-note^='A'] {
-			background-color: #ffffff;
-			color: #ffffff;
-			font-weight: bold;
-		}
-		&[data-note^='A#'] {
-			background-color: #000000;
-			color: #000000;
-			font-weight: bold;
-		}
-		&[data-note^='B'] {
-			background-color: #ffffff;
-			color: #ffffff;
-			font-weight: bold;
+			&[data-note^='E'] {
+				background-color: #ffffff;
+				color: #ffffff;
+				font-weight: bold;
+			}
+			&[data-note^='F'] {
+				background-color: #ffffff;
+				color: #ffffff;
+				font-weight: bold;
+			}
+			&[data-note^='F#'] {
+				background-color: #000000;
+				color: #000000;
+				font-weight: bold;
+			}
+			&[data-note^='G'] {
+				background-color: #ffffff;
+				color: #ffffff;
+				font-weight: bold;
+			}
+			&[data-note^='G#'] {
+				background-color: #000000;
+				color: #000000;
+				font-weight: bold;
+			}
+			&[data-note^='A'] {
+				background-color: #ffffff;
+				color: #ffffff;
+				font-weight: bold;
+			}
+			&[data-note^='A#'] {
+				background-color: #000000;
+				color: #000000;
+				font-weight: bold;
+			}
+			&[data-note^='B'] {
+				background-color: #ffffff;
+				color: #ffffff;
+				font-weight: bold;
+			}
 		}
 	}
 }

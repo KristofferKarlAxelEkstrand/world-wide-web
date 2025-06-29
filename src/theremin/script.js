@@ -31,8 +31,8 @@ class ThereminApp extends HTMLElement {
 
 		this._settings = {
 			range: {
-				min: this._notes[0],
-				max: this._notes[this._notes.length - 1],
+				min: this._notes[12],
+				max: this._notes[48],
 			},
 			smoothingFactors: {
 				frequency: 0.2,
@@ -51,12 +51,11 @@ class ThereminApp extends HTMLElement {
 		};
 
 		this.innerHTML = `
-			<style>
-				
-			</style>
 			<div class="theremin-settings">
 				<div class="theremin-settings-group">
 					Volume
+					<div>
+					Speed
 					<input
 						type="range"
 						min="0"
@@ -67,8 +66,50 @@ class ThereminApp extends HTMLElement {
 						aria-label="Volume"
 						oninput="this.getRootNode().host._targetGain = parseFloat(this.value)"
 					/>
+					</div>
 				</div>
-				vibrato volume range
+				<div class="theremin-settings-group">
+					Vibrato
+					<div>
+					Speed
+					<input
+						type="range"
+						min="0"
+						max="1"
+						step="0.01"
+						value="0.5"
+						style="width: 120px;"
+						aria-label="Volume"
+						oninput="this.getRootNode().host._targetGain = parseFloat(this.value)"
+					/>
+					</div>
+
+										<div>
+					Depth 
+					<input
+						type="range"
+						min="0"
+						max="1"
+						step="0.01"
+						value="0.5"
+						style="width: 120px;"
+						aria-label="Volume"
+						oninput="this.getRootNode().host._targetGain = parseFloat(this.value)"
+					/>
+					</div>
+				</div>
+				<div class="theremin-settings-group">
+					Range
+				</div>
+
+				<div class="theremin-settings-buttons">
+
+					<button class="fullscreen-button">
+
+				</div>
+
+
+
 			</div>
 			<div class="theremin-xy-pad">
 				<div class="label">Move mouse to play (L/R: pitch, U/D: volume)</div>
