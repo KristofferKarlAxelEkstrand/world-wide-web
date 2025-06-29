@@ -1,6 +1,16 @@
 import './styles.scss';
 
 class ThereminApp extends HTMLElement {
+	_audioCtx = null;
+	oscillator = null;
+	gainNode = null;
+
+	_animationFrameId = null;
+	_targetFreq = 440;
+	_targetGain = 0.5;
+	_currentFreq = 440;
+	_currentGain = 0.5;
+
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
@@ -36,52 +46,22 @@ class ThereminApp extends HTMLElement {
 				<div class="label">Move mouse to play (L/R: pitch, U/D: volume)</div>
 			</div>
 		`;
-
-		this._audioCtx = null;
-		this.oscillator = null;
-		this.gainNode = null;
-
-		this._animationFrameId = null;
-		this._targetFreq = 440;
-		this._targetGain = 0.5;
-		this._currentFreq = 440;
-		this._currentGain = 0.5;
-
-		// Bind event handlers to ensure correct 'this' context
-		this.handleMouseDown = this.handleMouseDown.bind(this);
-		this.handleMouseUp = this.handleMouseUp.bind(this);
 	}
 
-	// Linear interpolation helper function
-	lerp(a, b, t) {
-		return a + (b - a) * t;
-	}
+	lerp = (a, b, t) => a + (b - a) * t;
 
 	connectedCallback() {
 		this.thereminArea = this.shadowRoot.querySelector('.theremin-area');
 		this.thereminArea.addEventListener('mousedown', this.handleMouseDown);
 		window.addEventListener('mouseup', this.handleMouseUp);
 
-		const animate = () => {
-			if (this.oscillator && this.gainNode) {
-				this._currentFreq = this.lerp(this._currentFreq, this._targetFreq, 0.1);
-				this._currentGain = this.lerp(this._currentGain, this._targetGain, 0.1);
-
-				console.log(this._currentGain, this._currentFreq);
-
-				this.oscillator.frequency.value = this._currentFreq;
-				this.gainNode.gain.value = this._currentGain;
-			}
-			this._animationFrameId = requestAnimationFrame(animate);
-		};
-
 		this._updateTarget = (x, y, width, height) => {
-			const minFreq = 40;
-			const maxFreq = 2000;
+			const minFreq = 40,
+				maxFreq = 2000;
 			this._targetFreq = minFreq + (x / width) * (maxFreq - minFreq);
 
-			const minGain = 0.01;
-			const maxGain = 1.0;
+			const minGain = 0.01,
+				maxGain = 1.0;
 			this._targetGain = maxGain - (y / height) * (maxGain - minGain);
 		};
 
@@ -89,25 +69,33 @@ class ThereminApp extends HTMLElement {
 			const rect = this.thereminArea.getBoundingClientRect();
 			const x = e.clientX - rect.left;
 			const y = e.clientY - rect.top;
-			const width = rect.width;
-			const height = rect.height;
-			this._updateTarget(x, y, width, height);
+			this._updateTarget(x, y, rect.width, rect.height);
 		};
 
+		const animate = () => {
+			if (this.oscillator && this.gainNode) {
+				this._currentFreq = this.lerp(this._currentFreq, this._targetFreq, 0.1);
+				this._currentGain = this.lerp(this._currentGain, this._targetGain, 0.1);
+				this.oscillator.frequency.setTargetAtTime(this._targetFreq, this._audioCtx.currentTime, 0.05);
+				this.gainNode.gain.setTargetAtTime(this._targetGain, this._audioCtx.currentTime, 0.05);
+			}
+			this._animationFrameId = requestAnimationFrame(animate);
+		};
 		this._animationFrameId = requestAnimationFrame(animate);
 	}
 
 	disconnectedCallback() {
-		this.thereminArea.removeEventListener('mousedown', this.handleMouseDown);
-		this.thereminArea.removeEventListener('mousemove', this.handleMouseMove);
+		this.thereminArea?.removeEventListener('mousedown', this.handleMouseDown);
+		this.thereminArea?.removeEventListener('mousemove', this.handleMouseMove);
 		window.removeEventListener('mousemove', this.handleMouseMove);
 		window.removeEventListener('mouseup', this.handleMouseUp);
 		this.stopOscillator();
+		cancelAnimationFrame(this._animationFrameId);
 	}
 
-	handleMouseDown(e) {
+	handleMouseDown = (e) => {
 		if (!this._audioCtx) {
-			const AudioCtx = window.AudioContext || window['webkitAudioContext'];
+			const AudioCtx = window.AudioContext || window.webkitAudioContext;
 			this._audioCtx = new AudioCtx();
 			this.startOscillator();
 		} else if (this._audioCtx.state === 'suspended') {
@@ -116,7 +104,7 @@ class ThereminApp extends HTMLElement {
 		this.thereminArea.addEventListener('mousemove', this.handleMouseMove);
 		window.addEventListener('mousemove', this.handleMouseMove);
 		this.handleMouseMove(e);
-	}
+	};
 
 	startOscillator() {
 		if (this.oscillator) return;
@@ -138,10 +126,10 @@ class ThereminApp extends HTMLElement {
 		this.gainNode = null;
 	}
 
-	handleMouseUp(e) {
+	handleMouseUp = () => {
 		this.thereminArea.removeEventListener('mousemove', this.handleMouseMove);
 		window.removeEventListener('mousemove', this.handleMouseMove);
-	}
+	};
 }
 
 customElements.define('theremin-app', ThereminApp);
