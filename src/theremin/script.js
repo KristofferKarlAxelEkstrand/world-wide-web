@@ -220,6 +220,68 @@ class ThereminApp extends HTMLElement {
 		this._updateTarget(x, y, rect.width, rect.height);
 	};
 
+	handleTouchMove = (e) => {
+		if (!e.touches || e.touches.length === 0) return;
+		const touch = e.touches[0];
+		const rect = this.thereminXYPad.getBoundingClientRect();
+
+		let x = touch.clientX - rect.left;
+		if (x < 0) x = 0;
+		if (x > rect.width) x = rect.width;
+
+		let y = touch.clientY - rect.top;
+		if (y < 0) y = 0;
+		if (y > rect.height) y = rect.height;
+
+		this._updateTarget(x, y, rect.width, rect.height);
+	};
+
+	handleTouchStart = (e) => {
+		if (!this.#audioCtx) {
+			const AudioCtx = window.AudioContext || window['webkitAudioContext'];
+			this.#audioCtx = new AudioCtx();
+			this.startOscillator();
+		} else if (this.#audioCtx.state === 'suspended') {
+			this.#audioCtx.resume();
+		}
+		this.thereminXYPad.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+		window.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+		this.handleTouchMove(e);
+	};
+
+	handleTouchEnd = () => {
+		this.thereminXYPad.removeEventListener('touchmove', this.handleTouchMove);
+		window.removeEventListener('touchmove', this.handleTouchMove);
+	};
+
+	connectedCallback() {
+		this._updateRange();
+		this._updateNoteMatrix();
+
+		this.thereminXYPad = this.querySelector('.theremin-xy-pad');
+		this.indicator = this.querySelector('.indicator');
+
+		this.thereminXYPad.addEventListener('mousedown', this.handleMouseDown);
+		window.addEventListener('mouseup', this.handleMouseUp);
+
+		this.thereminXYPad.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+		window.addEventListener('touchend', this.handleTouchEnd);
+
+		this.#animationFrameId = requestAnimationFrame(this.animate);
+	}
+
+	disconnectedCallback() {
+		this.thereminXYPad?.removeEventListener('mousedown', this.handleMouseDown);
+		this.thereminXYPad?.removeEventListener('mousemove', this.handleMouseMove);
+		this.thereminXYPad?.removeEventListener('touchstart', this.handleTouchStart);
+		this.thereminXYPad?.removeEventListener('touchmove', this.handleTouchMove);
+		window.removeEventListener('mousemove', this.handleMouseMove);
+		window.removeEventListener('mouseup', this.handleMouseUp);
+		window.removeEventListener('touchmove', this.handleTouchMove);
+		window.removeEventListener('touchend', this.handleTouchEnd);
+		this.stopOscillator();
+		cancelAnimationFrame(this.#animationFrameId);
+	}
 	updateIndicator() {
 		const minGain = 0,
 			maxGain = 1.0;
