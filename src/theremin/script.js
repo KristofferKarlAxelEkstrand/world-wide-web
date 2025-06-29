@@ -37,9 +37,12 @@ class ThereminApp extends HTMLElement {
 			</div>
 		`;
 
-		this.audioCtx = null;
+		this._audioCtx = null;
 		this.oscillator = null;
 		this.gainNode = null;
+
+		this._gainValue = 0;
+		this._gainValueLast = 0;
 
 		this.handleMouseMove = this.handleMouseMove.bind(this);
 		this.handleMouseDown = this.handleMouseDown.bind(this);
@@ -61,20 +64,19 @@ class ThereminApp extends HTMLElement {
 	}
 
 	handleMouseDown(e) {
-		// Create or resume AudioContext on user gesture
-		if (!this.audioCtx) {
+		if (!this._audioCtx) {
 			const AudioCtx = window.AudioContext || window['webkitAudioContext'];
-			this.audioCtx = new AudioCtx();
+			this._audioCtx = new AudioCtx();
 			this.startOscillator();
-		} else if (this.audioCtx.state === 'suspended') {
-			this.audioCtx.resume();
+		} else if (this._audioCtx.state === 'suspended') {
+			this._audioCtx.resume();
 		}
 		this.thereminArea.addEventListener('mousemove', this.handleMouseMove);
 		window.addEventListener('mousemove', this.handleMouseMove);
 		this.handleMouseMove(e);
-		// Set gain to audible
+
 		if (this.gainNode) {
-			this.gainNode.gain.setValueAtTime(1.0, this.audioCtx.currentTime);
+			this.gainNode.gain.setValueAtTime(1.0, this._audioCtx.currentTime);
 		}
 	}
 
@@ -94,18 +96,18 @@ class ThereminApp extends HTMLElement {
 		const gain = maxGain - (y / height) * (maxGain - minGain);
 
 		if (this.oscillator && this.gainNode) {
-			this.oscillator.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
-			this.gainNode.gain.setValueAtTime(gain, this.audioCtx.currentTime);
+			this.oscillator.frequency.setValueAtTime(freq, this._audioCtx.currentTime);
+			this.gainNode.gain.setValueAtTime(gain, this._audioCtx.currentTime);
 		}
 	}
 
 	startOscillator() {
 		if (this.oscillator) return;
-		this.oscillator = this.audioCtx.createOscillator();
-		this.gainNode = this.audioCtx.createGain();
+		this.oscillator = this._audioCtx.createOscillator();
+		this.gainNode = this._audioCtx.createGain();
 		this.oscillator.type = 'sawtooth';
 		this.oscillator.connect(this.gainNode);
-		this.gainNode.connect(this.audioCtx.destination);
+		this.gainNode.connect(this._audioCtx.destination);
 		this.gainNode.gain.value = 0.5;
 		this.oscillator.start();
 	}
@@ -123,8 +125,8 @@ class ThereminApp extends HTMLElement {
 		this.thereminArea.removeEventListener('mousemove', this.handleMouseMove);
 		window.removeEventListener('mousemove', this.handleMouseMove);
 
-		if (this.gainNode && this.audioCtx) {
-			// this.gainNode.gain.linearRampToValueAtTime(0.0, this.audioCtx.currentTime + 0.1);
+		if (this.gainNode && this._audioCtx) {
+			this.gainNode.gain.value = 0.0;
 		}
 	}
 }
