@@ -41,8 +41,11 @@ class ThereminApp extends HTMLElement {
 		this.oscillator = null;
 		this.gainNode = null;
 
-		this._gainValue = 0;
-		this._gainValueLast = 0;
+		this._animationFrameId = null;
+		this._targetFreq = 440;
+		this._targetGain = 0.5;
+		this._currentFreq = 440;
+		this._currentGain = 0.5;
 
 		this.handleMouseMove = this.handleMouseMove.bind(this);
 		this.handleMouseDown = this.handleMouseDown.bind(this);
@@ -53,6 +56,41 @@ class ThereminApp extends HTMLElement {
 		this.thereminArea = this.shadowRoot.querySelector('.theremin-area');
 		this.thereminArea.addEventListener('mousedown', this.handleMouseDown);
 		window.addEventListener('mouseup', this.handleMouseUp);
+
+		const animate = () => {
+			if (this.oscillator && this.gainNode) {
+				const lerp = (a, b, t) => a + (b - a) * t;
+				this._currentFreq = lerp(this._currentFreq, this._targetFreq, 0.1);
+				this._currentGain = lerp(this._currentGain, this._targetGain, 0.1);
+
+				console.log(this._currentGain, this._currentFreq);
+
+				this.oscillator.frequency.value = this._currentFreq;
+				this.gainNode.gain.value = this._currentGain;
+			}
+			this._animationFrameId = requestAnimationFrame(animate);
+		};
+
+		this._updateTarget = (x, y, width, height) => {
+			const minFreq = 200;
+			const maxFreq = 2000;
+			this._targetFreq = minFreq + (x / width) * (maxFreq - minFreq);
+
+			const minGain = 0.01;
+			const maxGain = 1.0;
+			this._targetGain = maxGain - (y / height) * (maxGain - minGain);
+		};
+
+		this.handleMouseMove = (e) => {
+			const rect = this.thereminArea.getBoundingClientRect();
+			const x = e.clientX - rect.left;
+			const y = e.clientY - rect.top;
+			const width = rect.width;
+			const height = rect.height;
+			this._updateTarget(x, y, width, height);
+		};
+
+		this._animationFrameId = requestAnimationFrame(animate);
 	}
 
 	disconnectedCallback() {
@@ -76,7 +114,7 @@ class ThereminApp extends HTMLElement {
 		this.handleMouseMove(e);
 
 		if (this.gainNode) {
-			this.gainNode.gain.setValueAtTime(1.0, this._audioCtx.currentTime);
+			this.gainNode.gain.value = 1.0;
 		}
 	}
 
@@ -94,11 +132,6 @@ class ThereminApp extends HTMLElement {
 		const minGain = 0.01;
 		const maxGain = 1.0;
 		const gain = maxGain - (y / height) * (maxGain - minGain);
-
-		if (this.oscillator && this.gainNode) {
-			this.oscillator.frequency.setValueAtTime(freq, this._audioCtx.currentTime);
-			this.gainNode.gain.setValueAtTime(gain, this._audioCtx.currentTime);
-		}
 	}
 
 	startOscillator() {
@@ -108,7 +141,7 @@ class ThereminApp extends HTMLElement {
 		this.oscillator.type = 'sawtooth';
 		this.oscillator.connect(this.gainNode);
 		this.gainNode.connect(this._audioCtx.destination);
-		this.gainNode.gain.value = 0.5;
+		this.gainNode.gain.value = 0;
 		this.oscillator.start();
 	}
 
@@ -126,7 +159,7 @@ class ThereminApp extends HTMLElement {
 		window.removeEventListener('mousemove', this.handleMouseMove);
 
 		if (this.gainNode && this._audioCtx) {
-			this.gainNode.gain.value = 0.0;
+			this.gainNode.gain.value = this._currentFreq;
 		}
 	}
 }
