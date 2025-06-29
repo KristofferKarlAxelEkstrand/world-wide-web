@@ -47,9 +47,14 @@ class ThereminApp extends HTMLElement {
 		this._currentFreq = 440;
 		this._currentGain = 0.5;
 
-		this.handleMouseMove = this.handleMouseMove.bind(this);
+		// Bind event handlers to ensure correct 'this' context
 		this.handleMouseDown = this.handleMouseDown.bind(this);
 		this.handleMouseUp = this.handleMouseUp.bind(this);
+	}
+
+	// Linear interpolation helper function
+	lerp(a, b, t) {
+		return a + (b - a) * t;
 	}
 
 	connectedCallback() {
@@ -59,9 +64,8 @@ class ThereminApp extends HTMLElement {
 
 		const animate = () => {
 			if (this.oscillator && this.gainNode) {
-				const lerp = (a, b, t) => a + (b - a) * t;
-				this._currentFreq = lerp(this._currentFreq, this._targetFreq, 0.1);
-				this._currentGain = lerp(this._currentGain, this._targetGain, 0.1);
+				this._currentFreq = this.lerp(this._currentFreq, this._targetFreq, 0.1);
+				this._currentGain = this.lerp(this._currentGain, this._targetGain, 0.1);
 
 				console.log(this._currentGain, this._currentFreq);
 
@@ -112,26 +116,6 @@ class ThereminApp extends HTMLElement {
 		this.thereminArea.addEventListener('mousemove', this.handleMouseMove);
 		window.addEventListener('mousemove', this.handleMouseMove);
 		this.handleMouseMove(e);
-
-		if (this.gainNode) {
-			this.gainNode.gain.value = 1.0;
-		}
-	}
-
-	handleMouseMove(e) {
-		const rect = this.thereminArea.getBoundingClientRect();
-		const x = e.clientX - rect.left;
-		const y = e.clientY - rect.top;
-		const width = rect.width;
-		const height = rect.height;
-
-		const minFreq = 200;
-		const maxFreq = 2000;
-		const freq = minFreq + (x / width) * (maxFreq - minFreq);
-
-		const minGain = 0.01;
-		const maxGain = 1.0;
-		const gain = maxGain - (y / height) * (maxGain - minGain);
 	}
 
 	startOscillator() {
@@ -159,7 +143,7 @@ class ThereminApp extends HTMLElement {
 		window.removeEventListener('mousemove', this.handleMouseMove);
 
 		if (this.gainNode && this._audioCtx) {
-			this.gainNode.gain.value = this._currentFreq;
+			this.gainNode.gain.value = 0;
 		}
 	}
 }
