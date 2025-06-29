@@ -170,7 +170,7 @@ class ThereminApp extends HTMLElement {
 
 		let x = e.clientX - rect.left;
 		if (x < 0) x = 0;
-		if (x > rect.width) y = rect.width;
+		if (x > rect.width) x = rect.width;
 
 		let y = e.clientY - rect.top;
 		if (y < 0) y = 0;
