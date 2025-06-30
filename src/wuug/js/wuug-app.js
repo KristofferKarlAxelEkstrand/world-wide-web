@@ -12,7 +12,6 @@ class WuugApp extends HTMLElement {
 
 		// Oscillators
 
-		this.oscillatorTwo = this.audioCtx.createOscillator();
 		this.oscillatorSub = this.audioCtx.createOscillator();
 
 		this.oscillatorOne = this.audioCtx.createOscillator();
@@ -21,6 +20,13 @@ class WuugApp extends HTMLElement {
 		this.oscillatorOneGain = this.audioCtx.createGain();
 		this.oscillatorOneGain.gain.value = 0.5;
 		this.oscillatorOne.connect(this.oscillatorOneGain);
+
+		this.oscillatorTwo = this.audioCtx.createOscillator();
+		this.oscillatorTwo.type = 'sawtooth';
+		this.oscillatorTwo.frequency.value = this.mainFrequency;
+		this.oscillatorTwoGain = this.audioCtx.createGain();
+		this.oscillatorTwoGain.gain.value = 0.5;
+		this.oscillatorTwo.connect(this.oscillatorTwoGain);
 
 		// Mixer
 		this.mixer = this.audioCtx.createGain();
@@ -39,12 +45,15 @@ class WuugApp extends HTMLElement {
 		// Connect nodes
 
 		this.oscillatorOneGain.connect(this.mixer);
+		this.oscillatorTwoGain.connect(this.mixer);
+
 		this.mixer.connect(this.filter);
 		this.filter.connect(this.amp);
 		this.amp.connect(this.audioCtx.destination);
 
 		// Start oscillators
 		this.oscillatorOne.start();
+		this.oscillatorTwo.start();
 
 		// State
 		this.currentNote = null;
@@ -60,6 +69,7 @@ class WuugApp extends HTMLElement {
 		`;
 
 		// MIDI support
+		this.heldNotes = new Set();
 		if (navigator.requestMIDIAccess) {
 			navigator.requestMIDIAccess().then((midiAccess) => {
 				for (let input of midiAccess.inputs.values()) {
@@ -70,12 +80,24 @@ class WuugApp extends HTMLElement {
 							// note on
 							const freq = 440 * Math.pow(2, (data1 - 69) / 12);
 							this.mainFrequency = freq;
-							this.openfilter();
+							if (!this.heldNotes.has(data1)) {
+								this.heldNotes.add(data1);
+								if (this.heldNotes.size === 1) {
+									this.openFilter();
+								}
+							}
 						}
 						if (command === 0x80 || (command === 0x90 && data2 === 0)) {
 							// note off
-							const stopButton = this.querySelector('#stop');
-							this.closefilter();
+							this.heldNotes.delete(data1);
+							if (this.heldNotes.size === 0) {
+								this.closeFilter();
+							} else {
+								// Optionally update frequency to another held note
+								const nextNote = this.heldNotes.values().next().value;
+								const freq = 440 * Math.pow(2, (nextNote - 69) / 12);
+								this.mainFrequency = freq;
+							}
 						}
 					};
 				}
@@ -90,6 +112,7 @@ class WuugApp extends HTMLElement {
 
 		const animate = () => {
 			this.oscillatorOne.frequency.value = this.mainFrequency;
+			this.oscillatorTwo.frequency.value = this.mainFrequency + 1;
 			if (this.currentNote !== null) {
 				this.querySelector('.note-display').textContent = `Frequency: ${this.currentNote.toFixed(2)} Hz`;
 			}
@@ -98,32 +121,23 @@ class WuugApp extends HTMLElement {
 		animate();
 	}
 
-	openfilter() {
+	openFilter() {
 		this.currentNote = this.mainFrequency;
 
-		// Envelope: quick attack, decay to sustain, release on stop
 		const now = this.audioCtx.currentTime;
 		const filterFreq = this.filter.frequency;
 		filterFreq.cancelScheduledValues(now);
-		filterFreq.setValueAtTime(200, now); // start value
-		filterFreq.linearRampToValueAtTime(2000, now + 1); // attack
-		filterFreq.linearRampToValueAtTime(1000, now + 0.3); // decay to sustain
+		filterFreq.setTargetAtTime(2000, now, 0.15); // smooth attack to 2000Hz
+		filterFreq.setTargetAtTime(1000, now + 0.3, 0.2); // smooth decay to 1000Hz
 
-		// Clear any pending release
 		if (this.envelopeTimeout) clearTimeout(this.envelopeTimeout);
 	}
 
-	closefilter() {
+	closeFilter() {
 		const now = this.audioCtx.currentTime;
-		const filter = this.filter.frequency;
-		filter.cancelScheduledValues(now);
-		filter.setValueAtTime(filter.value, now);
-		filter.linearRampToValueAtTime(200, now + 0.2); // release
-
-		this.envelopeTimeout = setTimeout(() => {
-			this.currentNote = null;
-			this.querySelector('.note-display').textContent = '';
-		}, 250);
+		const filterFreq = this.filter.frequency;
+		filterFreq.cancelScheduledValues(now);
+		filterFreq.setTargetAtTime(200, now, 0.15); // smooth release to 200Hz
 	}
 }
 
