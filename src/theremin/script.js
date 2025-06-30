@@ -70,6 +70,48 @@ class ThereminApp extends HTMLElement {
 		this.#currentFreq = (this.#settings.range.min.frequency + this.#settings.range.max.frequency) / 2;
 	}
 
+	connectedCallback() {
+		this.#updateRange();
+		this.#updateNoteMatrix();
+
+		this.thereminXYPad = this.querySelector('.theremin-xy-pad');
+		this.indicator = this.querySelector('.indicator');
+
+		this.thereminXYPad.addEventListener('mousedown', this.#handleMouseDown);
+		window.addEventListener('mouseup', this.#handleMouseUp);
+
+		this.thereminXYPad.addEventListener('touchstart', this.#handleTouchStart, { passive: false });
+		window.addEventListener('touchend', this.#handleTouchEnd);
+
+		this.#animationFrameId = requestAnimationFrame(this.#animate);
+	}
+
+	connectedCallback() {
+		this.#updateRange();
+		this.#updateNoteMatrix();
+
+		this.thereminXYPad = this.querySelector('.theremin-xy-pad');
+		this.indicator = this.querySelector('.indicator');
+
+		this.thereminXYPad.addEventListener('mousedown', this.#handleMouseDown);
+		window.addEventListener('mouseup', this.#handleMouseUp);
+
+		this.#animationFrameId = requestAnimationFrame(this.#animate);
+	}
+
+	disconnectedCallback() {
+		this.thereminXYPad?.removeEventListener('mousedown', this.#handleMouseDown);
+		this.thereminXYPad?.removeEventListener('mousemove', this.#handleMouseMove);
+		this.thereminXYPad?.removeEventListener('touchstart', this.#handleTouchStart);
+		this.thereminXYPad?.removeEventListener('touchmove', this.#handleTouchMove);
+		window.removeEventListener('mousemove', this.#handleMouseMove);
+		window.removeEventListener('mouseup', this.#handleMouseUp);
+		window.removeEventListener('touchmove', this.#handleTouchMove);
+		window.removeEventListener('touchend', this.#handleTouchEnd);
+		this.#stopOscillator();
+		cancelAnimationFrame(this.#animationFrameId);
+	}
+
 	updateSetting({ value, group, name }) {
 		if (!this.#settings.hasOwnProperty(group)) {
 			this.#settings[group] = {};
@@ -80,7 +122,7 @@ class ThereminApp extends HTMLElement {
 		this.#settings[group][name] = value;
 	}
 
-	setupLFO() {
+	#setupLFO() {
 		if (!this.#audioCtx) return;
 		this.#lfo = this.#audioCtx.createOscillator();
 		this.#lfoGain = this.#audioCtx.createGain();
@@ -95,7 +137,7 @@ class ThereminApp extends HTMLElement {
 		this.#lfo.start();
 	}
 
-	stopLFO() {
+	#stopLFO() {
 		if (this.#lfo) {
 			this.#lfo.stop();
 			this.#lfo.disconnect();
@@ -107,7 +149,7 @@ class ThereminApp extends HTMLElement {
 		}
 	}
 
-	startOscillator() {
+	#startOscillator() {
 		if (this.#oscillator) return;
 		this.#oscillator = this.#audioCtx.createOscillator();
 		this.#oscillator.frequency.value = this.#currentFreq;
@@ -118,12 +160,12 @@ class ThereminApp extends HTMLElement {
 		this.#gainNode.gain.value = 0;
 
 		this.#oscillator.start();
-		this.setupLFO();
+		this.#setupLFO();
 	}
 
-	stopOscillator() {
+	#stopOscillator() {
 		if (!this.#oscillator) return;
-		this.stopLFO();
+		this.#stopLFO();
 		this.#oscillator.stop();
 		this.#oscillator.disconnect();
 		this.#gainNode.disconnect();
@@ -131,22 +173,9 @@ class ThereminApp extends HTMLElement {
 		this.#gainNode = null;
 	}
 
-	linearInterpolation = (a, b, t) => a + (b - a) * t;
+	#linearInterpolation = (a, b, t) => a + (b - a) * t;
 
-	connectedCallback() {
-		this._updateRange();
-		this._updateNoteMatrix();
-
-		this.thereminXYPad = this.querySelector('.theremin-xy-pad');
-		this.indicator = this.querySelector('.indicator');
-
-		this.thereminXYPad.addEventListener('mousedown', this.handleMouseDown);
-		window.addEventListener('mouseup', this.handleMouseUp);
-
-		this.#animationFrameId = requestAnimationFrame(this.animate);
-	}
-
-	_updateNoteMatrix = () => {
+	#updateNoteMatrix = () => {
 		if (this.#noteMatrix) {
 			const minMidi = this.#settings.range.min.midi;
 			const maxMidi = this.#settings.range.max.midi;
@@ -156,12 +185,12 @@ class ThereminApp extends HTMLElement {
 		}
 	};
 
-	animate = () => {
+	#animate = () => {
 		if (this.#oscillator && this.#gainNode) {
-			this.#currentFreq = this.linearInterpolation(this.#currentFreq, this.#targetFreq, 1 - this.#settings.smoothingFactors.pitch);
-			this.#currentGain = this.linearInterpolation(this.#currentGain, this.#targetGain, 1 - this.#settings.smoothingFactors.gain);
+			this.#currentFreq = this.#linearInterpolation(this.#currentFreq, this.#targetFreq, 1 - this.#settings.smoothingFactors.pitch);
+			this.#currentGain = this.#linearInterpolation(this.#currentGain, this.#targetGain, 1 - this.#settings.smoothingFactors.gain);
 
-			this.#currentGainMapped = this.linearInterpolation(this.#currentGainMapped, this.#targetGainMapped, 1 - this.#settings.smoothingFactors.gain);
+			this.#currentGainMapped = this.#linearInterpolation(this.#currentGainMapped, this.#targetGainMapped, 1 - this.#settings.smoothingFactors.gain);
 
 			const mixRatio = this.#currentGain <= 0.7 ? 0 : (this.#currentGain - 0.7) / 0.3;
 
@@ -177,11 +206,11 @@ class ThereminApp extends HTMLElement {
 
 			this.#gainNode.gain.setTargetAtTime(this.#currentGainMapped * this.#settings.volume.volume, this.#audioCtx.currentTime, 0.05);
 		}
-		this.updateIndicator();
-		this.#animationFrameId = requestAnimationFrame(this.animate);
+		this.#updateIndicator();
+		this.#animationFrameId = requestAnimationFrame(this.#animate);
 	};
 
-	_updateRange = () => {
+	#updateRange = () => {
 		const minNoteIdx = this.#settings.range.min.arrayIndex;
 		const maxNoteIdx = this.#settings.range.max.arrayIndex;
 		const minIdx = Math.max(0, minNoteIdx - 1);
@@ -190,7 +219,7 @@ class ThereminApp extends HTMLElement {
 		this.#settings.rangeHz.max = (this.#notes[maxNoteIdx].frequency + this.#notes[maxIdx].frequency) / 2;
 	};
 
-	_updateTarget = (x, y, width, height) => {
+	#updateTarget = (x, y, width, height) => {
 		this.#targetFreq = this.#settings.rangeHz.min + (x / width) * (this.#settings.rangeHz.max - this.#settings.rangeHz.min);
 
 		const minGain = 0.01,
@@ -206,7 +235,7 @@ class ThereminApp extends HTMLElement {
 		}
 	};
 
-	handleMouseMove = (e) => {
+	#handleMouseMove = (e) => {
 		const rect = this.thereminXYPad.getBoundingClientRect();
 
 		let x = e.clientX - rect.left;
@@ -217,10 +246,10 @@ class ThereminApp extends HTMLElement {
 		if (y < 0) y = 0;
 		if (y > rect.height) y = rect.height;
 
-		this._updateTarget(x, y, rect.width, rect.height);
+		this.#updateTarget(x, y, rect.width, rect.height);
 	};
 
-	handleTouchMove = (e) => {
+	#handleTouchMove = (e) => {
 		if (!e.touches || e.touches.length === 0) return;
 		const touch = e.touches[0];
 		const rect = this.thereminXYPad.getBoundingClientRect();
@@ -233,56 +262,28 @@ class ThereminApp extends HTMLElement {
 		if (y < 0) y = 0;
 		if (y > rect.height) y = rect.height;
 
-		this._updateTarget(x, y, rect.width, rect.height);
+		this.#updateTarget(x, y, rect.width, rect.height);
 	};
 
-	handleTouchStart = (e) => {
+	#handleTouchStart = (e) => {
 		if (!this.#audioCtx) {
 			const AudioCtx = window.AudioContext || window['webkitAudioContext'];
 			this.#audioCtx = new AudioCtx();
-			this.startOscillator();
+			this.#startOscillator();
 		} else if (this.#audioCtx.state === 'suspended') {
 			this.#audioCtx.resume();
 		}
-		this.thereminXYPad.addEventListener('touchmove', this.handleTouchMove, { passive: false });
-		window.addEventListener('touchmove', this.handleTouchMove, { passive: false });
-		this.handleTouchMove(e);
+		this.thereminXYPad.addEventListener('touchmove', this.#handleTouchMove, { passive: false });
+		window.addEventListener('touchmove', this.#handleTouchMove, { passive: false });
+		this.#handleTouchMove(e);
 	};
 
-	handleTouchEnd = () => {
-		this.thereminXYPad.removeEventListener('touchmove', this.handleTouchMove);
-		window.removeEventListener('touchmove', this.handleTouchMove);
+	#handleTouchEnd = () => {
+		this.thereminXYPad.removeEventListener('touchmove', this.#handleTouchMove);
+		window.removeEventListener('touchmove', this.#handleTouchMove);
 	};
 
-	connectedCallback() {
-		this._updateRange();
-		this._updateNoteMatrix();
-
-		this.thereminXYPad = this.querySelector('.theremin-xy-pad');
-		this.indicator = this.querySelector('.indicator');
-
-		this.thereminXYPad.addEventListener('mousedown', this.handleMouseDown);
-		window.addEventListener('mouseup', this.handleMouseUp);
-
-		this.thereminXYPad.addEventListener('touchstart', this.handleTouchStart, { passive: false });
-		window.addEventListener('touchend', this.handleTouchEnd);
-
-		this.#animationFrameId = requestAnimationFrame(this.animate);
-	}
-
-	disconnectedCallback() {
-		this.thereminXYPad?.removeEventListener('mousedown', this.handleMouseDown);
-		this.thereminXYPad?.removeEventListener('mousemove', this.handleMouseMove);
-		this.thereminXYPad?.removeEventListener('touchstart', this.handleTouchStart);
-		this.thereminXYPad?.removeEventListener('touchmove', this.handleTouchMove);
-		window.removeEventListener('mousemove', this.handleMouseMove);
-		window.removeEventListener('mouseup', this.handleMouseUp);
-		window.removeEventListener('touchmove', this.handleTouchMove);
-		window.removeEventListener('touchend', this.handleTouchEnd);
-		this.stopOscillator();
-		cancelAnimationFrame(this.#animationFrameId);
-	}
-	updateIndicator() {
+	#updateIndicator() {
 		const minGain = 0,
 			maxGain = 1.0;
 		const area = this.thereminXYPad;
@@ -300,30 +301,30 @@ class ThereminApp extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		this.thereminXYPad?.removeEventListener('mousedown', this.handleMouseDown);
-		this.thereminXYPad?.removeEventListener('mousemove', this.handleMouseMove);
-		window.removeEventListener('mousemove', this.handleMouseMove);
-		window.removeEventListener('mouseup', this.handleMouseUp);
-		this.stopOscillator();
+		this.thereminXYPad?.removeEventListener('mousedown', this.#handleMouseDown);
+		this.thereminXYPad?.removeEventListener('mousemove', this.#handleMouseMove);
+		window.removeEventListener('mousemove', this.#handleMouseMove);
+		window.removeEventListener('mouseup', this.#handleMouseUp);
+		this.#stopOscillator();
 		cancelAnimationFrame(this.#animationFrameId);
 	}
 
-	handleMouseDown = (e) => {
+	#handleMouseDown = (e) => {
 		if (!this.#audioCtx) {
 			const AudioCtx = window.AudioContext || window['webkitAudioContext'];
 			this.#audioCtx = new AudioCtx();
-			this.startOscillator();
+			this.#startOscillator();
 		} else if (this.#audioCtx.state === 'suspended') {
 			this.#audioCtx.resume();
 		}
-		this.thereminXYPad.addEventListener('mousemove', this.handleMouseMove);
-		window.addEventListener('mousemove', this.handleMouseMove);
-		this.handleMouseMove(e);
+		this.thereminXYPad.addEventListener('mousemove', this.#handleMouseMove);
+		window.addEventListener('mousemove', this.#handleMouseMove);
+		this.#handleMouseMove(e);
 	};
 
-	handleMouseUp = () => {
-		this.thereminXYPad.removeEventListener('mousemove', this.handleMouseMove);
-		window.removeEventListener('mousemove', this.handleMouseMove);
+	#handleMouseUp = () => {
+		this.thereminXYPad.removeEventListener('mousemove', this.#handleMouseMove);
+		window.removeEventListener('mousemove', this.#handleMouseMove);
 	};
 }
 

@@ -95,9 +95,9 @@ theremin-app {
 			transform: translate(-50%, -50%);
 			z-index: 20;
 
-			border: 2px solid #ffffff4f;
+			border: 2px solid #ffffff25;
 			border-radius: 50%;
-			background: rgba(255, 255, 255, 0.185);
+			background: rgba(175, 175, 175, 0.068);
 			width: 4rem;
 			height: 4rem;
 			pointer-events: none;
@@ -106,13 +106,14 @@ theremin-app {
 		.note-matrix {
 			display: flex;
 			gap: 0;
-			opacity: 0.05;
+			opacity: 0.02;
 			height: 100%;
 			pointer-events: none;
 			user-select: none;
 			> div {
 				flex: 1;
 				flex-grow: 1;
+				box-shadow: inset 0 0 0 1px #000000;
 				border: none;
 				background-color: #f9f9f9;
 				padding: 0;
