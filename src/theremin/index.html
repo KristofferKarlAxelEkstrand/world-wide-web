@@ -7,19 +7,15 @@
 	</head>
 	<body>
 		<theremin-app>
-
 			<div class="theremin-settings">
-
 				<div class="theremin-settings-group">
-				
-				Volume
+					Volume
 					<div>
 						<div>
 							<dial-knob min="0" max="1" value="0.5" step="0.001" setting-group="volume" setting-name="volume"></dial-knob>
 							Volume
 						</div>
 					</div>
-
 				</div>
 
 				<div class="theremin-settings-group">
@@ -35,7 +31,6 @@
 						</div>
 					</div>
 				</div>
-
 				<div class="theremin-settings-group">
 					Vibrato
 					<div>
@@ -49,7 +44,6 @@
 						</div>
 					</div>
 				</div>
-
 				<div class="theremin-settings-group">
 					vibratoExpression 
 					<div>
@@ -63,18 +57,19 @@
 						</div>
 					</div>
 				</div>
-
 				<div class="theremin-settings-buttons">
 					<button class="fullscreen-button"></button>
+					<button class="osc-shape" shape="sawtooth">sawtooth</button>
+					<button class="osc-shape" shape="sine">sine</button>
+					<button class="osc-shape" shape="square">square</button>
+					<button class="osc-shape" shape="triangle">triangle</button>
 				</div>
 			</div>
-
 			<div class="theremin-xy-pad">
 				<div class="note-matrix"></div>
 				<div class="indicator"></div>
 			</div>
 		</theremin-app>
-
 		<script type="module" src="./script.js"></script>
 	</body>
 </html>

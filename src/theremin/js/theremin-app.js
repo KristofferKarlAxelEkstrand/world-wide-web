@@ -50,6 +50,9 @@ class ThereminApp extends HTMLElement {
 				frequency: 5,
 				amplitude: 12.6,
 			},
+			oscillator: {
+				shape: 'sawtooth',
+			},
 		};
 
 		this.#targetFreq = (this.#settings.range.min.frequency + this.#settings.range.max.frequency) / 2;
@@ -68,6 +71,16 @@ class ThereminApp extends HTMLElement {
 
 		this.thereminXYPad.addEventListener('touchstart', this.#handleTouchStart, { passive: false });
 		window.addEventListener('touchend', this.#handleTouchEnd);
+
+		this.buttons = this.querySelectorAll('button.osc-shape');
+		this.buttons.forEach((btn) => {
+			btn.addEventListener('click', (e) => {
+				const shape = btn.getAttribute('shape');
+
+				this.updateSetting({ group: 'oscillator', name: 'shape', value: shape });
+				this.#setOscillatorShape(shape);
+			});
+		});
 
 		this.#animationFrameId = requestAnimationFrame(this.#animate);
 	}
@@ -93,6 +106,15 @@ class ThereminApp extends HTMLElement {
 			this.#settings[group][name] = value;
 		}
 		this.#settings[group][name] = value;
+	}
+
+	#setOscillatorShape(shape) {
+		if (shape !== 'sine' && shape !== 'square' && shape !== 'sawtooth' && shape !== 'triangle') {
+			shape = 'sawtooth';
+		}
+
+		if (!this.#oscillator) return;
+		this.#oscillator.type = shape;
 	}
 
 	#setupLFO() {
