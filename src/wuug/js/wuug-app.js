@@ -8,31 +8,37 @@ class WuugApp extends HTMLElement {
 
 		this.mainFrequency = 440;
 
-		this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+		this.audioCtx = new (window.AudioContext || window?.webkitAudioContext)();
 
 		// Oscillators
-		this.oscillatorOne = this.audioCtx.createOscillator();
+
 		this.oscillatorTwo = this.audioCtx.createOscillator();
 		this.oscillatorSub = this.audioCtx.createOscillator();
 
-		this.oscillatorOne.type = 'sine';
+		this.oscillatorOne = this.audioCtx.createOscillator();
+		this.oscillatorOne.type = 'sawtooth';
 		this.oscillatorOne.frequency.value = this.mainFrequency;
+		this.oscillatorOneGain = this.audioCtx.createGain();
+		this.oscillatorOneGain.gain.value = 0.5;
+		this.oscillatorOne.connect(this.oscillatorOneGain);
 
 		// Mixer
 		this.mixer = this.audioCtx.createGain();
-		this.mixer.gain.value = 1;
+		this.mixer.gain.value = 0.75;
 
 		// Filter
 		this.filter = this.audioCtx.createBiquadFilter();
 		this.filter.type = 'lowpass';
-		this.filter.frequency.value = 2000;
+		this.filter.frequency.value = 1000;
+		this.filter.Q.value = 1;
 
 		// Amp (always on)
 		this.amp = this.audioCtx.createGain();
-		this.amp.gain.value = 1; //
+		this.amp.gain.value = 1;
 
 		// Connect nodes
-		this.oscillatorOne.connect(this.mixer);
+
+		this.oscillatorOneGain.connect(this.mixer);
 		this.mixer.connect(this.filter);
 		this.filter.connect(this.amp);
 		this.amp.connect(this.audioCtx.destination);
@@ -64,6 +70,12 @@ class WuugApp extends HTMLElement {
 							// note on
 							const freq = 440 * Math.pow(2, (data1 - 69) / 12);
 							this.mainFrequency = freq;
+							this.openfilter();
+						}
+						if (command === 0x80 || (command === 0x90 && data2 === 0)) {
+							// note off
+							const stopButton = this.querySelector('#stop');
+							this.closefilter();
 						}
 					};
 				}
@@ -71,6 +83,10 @@ class WuugApp extends HTMLElement {
 		} else {
 			this.querySelector('.note-display').textContent = 'Web MIDI not supported';
 		}
+		const playButton = this.querySelector('#play');
+		const stopButton = this.querySelector('#stop');
+
+		this.envelopeTimeout = null;
 
 		const animate = () => {
 			this.oscillatorOne.frequency.value = this.mainFrequency;
@@ -80,6 +96,34 @@ class WuugApp extends HTMLElement {
 			requestAnimationFrame(animate);
 		};
 		animate();
+	}
+
+	openfilter() {
+		this.currentNote = this.mainFrequency;
+
+		// Envelope: quick attack, decay to sustain, release on stop
+		const now = this.audioCtx.currentTime;
+		const filterFreq = this.filter.frequency;
+		filterFreq.cancelScheduledValues(now);
+		filterFreq.setValueAtTime(200, now); // start value
+		filterFreq.linearRampToValueAtTime(2000, now + 1); // attack
+		filterFreq.linearRampToValueAtTime(1000, now + 0.3); // decay to sustain
+
+		// Clear any pending release
+		if (this.envelopeTimeout) clearTimeout(this.envelopeTimeout);
+	}
+
+	closefilter() {
+		const now = this.audioCtx.currentTime;
+		const filter = this.filter.frequency;
+		filter.cancelScheduledValues(now);
+		filter.setValueAtTime(filter.value, now);
+		filter.linearRampToValueAtTime(200, now + 0.2); // release
+
+		this.envelopeTimeout = setTimeout(() => {
+			this.currentNote = null;
+			this.querySelector('.note-display').textContent = '';
+		}, 250);
 	}
 }
 
