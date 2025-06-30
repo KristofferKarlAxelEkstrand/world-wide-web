@@ -196,6 +196,13 @@ class ThereminApp extends HTMLElement {
 				this.#lfo.frequency.setTargetAtTime(vibratoFreq, this.#audioCtx.currentTime, 0.05);
 				this.#lfoGain.gain.setTargetAtTime(vibratoAmplitude, this.#audioCtx.currentTime, 0.05);
 			}
+			if (this.indicator) {
+				const duration = 1 / vibratoFreq;
+
+				this.indicator.style.setProperty('--vibrato-duration', `${duration}s`);
+				this.indicator.style.setProperty('--vibrato-amplitude', `${vibratoAmplitude}px`);
+				this.indicator.style.setProperty('--vibrato-amplitude-negative', `${-vibratoAmplitude}px`);
+			}
 
 			this.#oscillator.frequency.setTargetAtTime(this.#currentFreq, this.#audioCtx.currentTime, 0.05);
 

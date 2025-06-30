@@ -98,6 +98,21 @@ theremin-app {
 			width: 4rem;
 			height: 4rem;
 			pointer-events: none;
+
+			&::after {
+				display: block;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+
+				animation: vibrato-indicator var(--vibrato-duration, 0.5s) infinite linear;
+				border-radius: 50%;
+				background-color: #ffffff;
+				width: 0.5rem;
+				height: 0.5rem;
+				content: '';
+			}
 		}
 
 		.note-matrix {
@@ -185,18 +200,21 @@ theremin-app {
 	}
 }
 
-.indicator-label {
-	position: absolute;
-	top: 36px;
-	left: 50%;
-	transform: translateX(-50%);
-	border-radius: 4px;
-	background: rgba(0, 0, 0, 0.5);
-	padding: 2px 6px;
-	pointer-events: none;
-	color: #fff;
-	font-size: 0.85rem;
-	white-space: nowrap;
+//				this.indicator.style.setProperty('--vibrato-duration', `${duration}s`);
+//				this.indicator.style.setProperty('--vibrato-amplitude', `${vibratoAmplitude}px`);
+//				this.indicator.style.setProperty('--vibrato-amplitude-negative', `${-vibratoAmplitude}px`);
+//			}
+
+@keyframes vibrato-indicator {
+	0% {
+		transform: translateX(var(--vibrato-amplitude-negative));
+	}
+	50% {
+		transform: translateX(var(--vibrato-amplitude));
+	}
+	100% {
+		transform: translateX(var(--vibrato-amplitude-negative));
+	}
 }
 
 dial-knob {
