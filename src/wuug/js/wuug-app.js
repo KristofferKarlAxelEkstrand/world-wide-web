@@ -30,6 +30,8 @@ class WuugApp extends HTMLElement {
 		};
 
 		this.mainFrequency = 440;
+		this.targetFrequency = 440;
+		this.pitchValue = 0; // Default pitch multiplier
 
 		this.audioCtx = new (window.AudioContext || window?.webkitAudioContext)();
 
@@ -53,7 +55,7 @@ class WuugApp extends HTMLElement {
 
 		// Mixer
 		this.mixer = this.audioCtx.createGain();
-		this.mixer.gain.value = 0.5;
+		this.mixer.gain.value = 0.4;
 
 		// Filter
 		this.filter = this.audioCtx.createBiquadFilter();
@@ -78,21 +80,19 @@ class WuugApp extends HTMLElement {
 
 		// State
 		this.currentNote = null;
-
 		this.waveShaperOscillators = this.audioCtx.createWaveShaper();
 		this.waveShaperOscillators.curve = new Float32Array(256).map((_, i) => {
 			const x = i / 128 - 1;
-			return Math.tanh(3 * x); // simple soft clipping
+			return Math.tanh(1.2 * x); // softer soft clipping
 		});
 		this.waveShaperOscillators.oversample = '2x';
 
 		this.waveShaperFilter = this.audioCtx.createWaveShaper();
-		// Very soft tube distortion curve
+		// Even softer tube distortion curve
 		const curve = new Float32Array(256);
 		for (let i = 0; i < 256; ++i) {
 			const x = (i / 255) * 2 - 1;
-			// Softer tube-like curve
-			curve[i] = Math.tanh(1.2 * x);
+			curve[i] = Math.tanh(0.7 * x); // softer curve
 		}
 		this.waveShaperFilter.curve = curve;
 		this.waveShaperFilter.oversample = '2x';
@@ -108,6 +108,8 @@ class WuugApp extends HTMLElement {
 		this.amp.connect(this.audioCtx.destination);
 	}
 
+	#linearInterpolation = (a, b, t) => a + (b - a) * t;
+
 	connectedCallback() {
 		window.addEventListener('pointerdown', this.resumeAndStart);
 		window.addEventListener('keydown', this.resumeAndStart);
@@ -117,8 +119,47 @@ class WuugApp extends HTMLElement {
 				<button id="play">Play</button>
 				<button id="stop">Stop</button>
 			</div>
-			<div class="note-display"></div>
+			<div class="oscillator-controls">
+				<label>
+					Pitch:
+					<input type="range" id="osc1-pitch" min="-24" max="24" value="0" step="1">
+					<span id="osc1-pitch-value">440</span> Hz
+				</label>
+				<label>
+					Fine pitch:
+					<input type="range" id="osc1-pitch-fine" min="-1" max="1" value="0" step="0.01">
+					<span id="osc1-pitch-value">440</span> Hz
+				</label>
+				<label>
+					Volume:
+					<input type="range" id="osc1-volume" min="0" max="1" value="0.5" step="0.01">
+					<span id="osc1-volume-value">0.5</span>
+				</label>
+			</div>
 		`;
+
+		// Sticky zero for pitch slider
+		const osc1Pitch = this.querySelector('#osc1-pitch');
+		osc1Pitch.addEventListener('input', (e) => {
+			let value = parseFloat(e.target.value);
+			// If near zero, snap to zero
+			if (Math.abs(value) < 0.2) {
+				value = 0;
+				e.target.value = 0;
+			}
+			this.pitchValue = value;
+			const adjustedFreq = this.mainFrequency * Math.pow(2, value / 12);
+			this.querySelector('#osc1-pitch-value').textContent = adjustedFreq.toFixed(2);
+		});
+
+		const oscOnePitch = this.querySelector('#osc1-pitch');
+		oscOnePitch.addEventListener('input', (e) => {
+			const pitchValue = parseFloat(e.target.value); // This is already -12 to +12
+			this.pitchValue = pitchValue; // Use directly, don't add 1
+
+			// Calculate the actual frequency with the pitch offset
+			const adjustedFreq = this.mainFrequency * Math.pow(2, this.pitchValue / 12);
+		});
 
 		// MIDI support
 		this.heldNotes = new Set();
@@ -129,9 +170,10 @@ class WuugApp extends HTMLElement {
 						const [status, data1, data2] = msg.data;
 						const command = status & 0xf0;
 						if (command === 0x90 && data2 > 0) {
-							// note on
 							const freq = 440 * Math.pow(2, (data1 - 69) / 12);
-							this.mainFrequency = freq;
+
+							this.targetFrequency = freq;
+
 							if (!this.heldNotes.has(data1)) {
 								this.heldNotes.add(data1);
 								if (this.heldNotes.size === 1) {
@@ -140,15 +182,13 @@ class WuugApp extends HTMLElement {
 							}
 						}
 						if (command === 0x80 || (command === 0x90 && data2 === 0)) {
-							// note off
 							this.heldNotes.delete(data1);
 							if (this.heldNotes.size === 0) {
 								this.closeFilter();
 							} else {
-								// Optionally update frequency to another held note
 								const nextNote = this.heldNotes.values().next().value;
 								const freq = 440 * Math.pow(2, (nextNote - 69) / 12);
-								this.mainFrequency = freq;
+								this.targetFrequency = freq;
 							}
 						}
 					};
@@ -163,11 +203,14 @@ class WuugApp extends HTMLElement {
 		this.envelopeTimeout = null;
 
 		const animate = () => {
-			this.oscillatorOne.frequency.value = this.mainFrequency;
-			this.oscillatorTwo.frequency.value = this.mainFrequency + 1;
-			if (this.currentNote !== null) {
-				this.querySelector('.note-display').textContent = `Frequency: ${this.currentNote.toFixed(2)} Hz`;
-			}
+			this.mainFrequency = this.#linearInterpolation(this.mainFrequency, this.targetFrequency, 0.9);
+
+			this.frequencyOscillatorOne = this.mainFrequency * Math.pow(2, this.pitchValue / 12);
+			this.oscillatorOne.frequency.setTargetAtTime(this.frequencyOscillatorOne, this.audioCtx.currentTime, 0.01);
+
+			// Smoothly ramp oscillatorTwo's frequency to mainFrequency over 0.1 seconds
+			this.oscillatorTwo.frequency.setTargetAtTime(this.mainFrequency, this.audioCtx.currentTime, 0.01);
+
 			requestAnimationFrame(animate);
 		};
 		animate();
@@ -188,7 +231,7 @@ class WuugApp extends HTMLElement {
 		const filterFreq = this.filter.frequency;
 		filterFreq.cancelScheduledValues(now);
 		filterFreq.setTargetAtTime(2000, now, 0.05); // smooth attack to 2000Hz
-		filterFreq.setTargetAtTime(400, now + 0.3, 0.2); // smooth decay to 1000Hz
+		filterFreq.setTargetAtTime(400, now + 0.1, 0.05); // smooth decay to 1000Hz
 
 		if (this.envelopeTimeout) clearTimeout(this.envelopeTimeout);
 	}
@@ -197,7 +240,7 @@ class WuugApp extends HTMLElement {
 		const now = this.audioCtx.currentTime;
 		const filterFreq = this.filter.frequency;
 		filterFreq.cancelScheduledValues(now);
-		filterFreq.setTargetAtTime(40, now, 0.15); // smooth release to 200Hz
+		filterFreq.setTargetAtTime(40, now, 0.1); // smooth release to 200Hz
 	}
 }
 
