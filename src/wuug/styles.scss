@@ -1,0 +1,234 @@
+@use '_include-media.scss';
+
+:root {
+	--primary-color: #000000;
+	--secondary-color: #666666;
+	--tertiary-color: #ffffff;
+	--background-color: #f5f5f5;
+}
+
+html {
+	box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+	box-sizing: inherit;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	font-family: 'Roboto', sans-serif;
+}
+
+wuug-app {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+	box-shadow:
+		inset 0 0 0.2rem rgb(0 0 0 / 13%),
+		inset 0 0 0.5rem rgb(0 0 0 / 8%);
+	border-radius: 0.5rem;
+	background-color: #f3f3f3;
+	padding: 2rem;
+	width: 100%;
+	height: 100vh;
+	max-height: 100dvh;
+	overflow: hidden;
+
+	> .theremin-settings {
+		display: flex;
+		flex-direction: row;
+		gap: 1rem;
+
+		> .theremin-settings-group {
+			display: flex;
+			flex-grow: 0;
+			flex-direction: column;
+			gap: 0.5rem;
+			border: 1px solid #d8d8d8;
+			border-radius: 0.5rem;
+			padding: 1rem;
+			width: 100%;
+			max-width: 20rem;
+
+			> div {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				gap: 0.5rem;
+				font-size: 0.8rem;
+
+				> div {
+					display: flex;
+					flex-grow: 1;
+					flex-direction: column;
+					justify-content: center;
+					align-items: center;
+					gap: 0.5rem;
+					padding: 1rem;
+					width: 50%;
+				}
+			}
+		}
+	}
+
+	> .theremin-xy-pad {
+		position: relative;
+		cursor: crosshair;
+		border-radius: 0.5rem;
+		background-color: rgb(60, 64, 70);
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+
+		> .indicator {
+			display: flex;
+			position: absolute;
+			justify-content: center;
+			align-items: center;
+			transform: translate(-50%, -50%);
+			z-index: 20;
+
+			border: 2px solid #ffffff25;
+			border-radius: 50%;
+			background: rgba(175, 175, 175, 0.068);
+			width: 4rem;
+			height: 4rem;
+			pointer-events: none;
+
+			&::after {
+				display: block;
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+
+				animation: vibrato-indicator var(--vibrato-duration, 0.5s) infinite linear;
+				border-radius: 50%;
+				background-color: #ffffff;
+				width: 0.5rem;
+				height: 0.5rem;
+				content: '';
+			}
+		}
+
+		.note-matrix {
+			display: flex;
+			gap: 0;
+			opacity: 0.02;
+			height: 100%;
+			pointer-events: none;
+			user-select: none;
+			> div {
+				flex: 1;
+				flex-grow: 1;
+				box-shadow: inset 0 0 0 1px #000000;
+				border: none;
+				background-color: #f9f9f9;
+				padding: 0;
+				overflow: hidden;
+				pointer-events: none;
+				user-select: none;
+				text-align: center;
+
+				&[data-note^='C'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				&[data-note^='C#'] {
+					background-color: #000000;
+					color: #000000;
+					font-weight: bold;
+				}
+				&[data-note^='D'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				&[data-note^='D#'] {
+					background-color: #000000;
+					color: #000000;
+					font-weight: bold;
+				}
+
+				&[data-note^='E'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				&[data-note^='F'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				&[data-note^='F#'] {
+					background-color: #000000;
+					color: #000000;
+					font-weight: bold;
+				}
+				&[data-note^='G'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				&[data-note^='G#'] {
+					background-color: #000000;
+					color: #000000;
+					font-weight: bold;
+				}
+				&[data-note^='A'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+				&[data-note^='A#'] {
+					background-color: #000000;
+					color: #000000;
+					font-weight: bold;
+				}
+				&[data-note^='B'] {
+					background-color: #ffffff;
+					color: #ffffff;
+					font-weight: bold;
+				}
+			}
+		}
+	}
+}
+
+@keyframes vibrato-indicator {
+	0% {
+		transform: translate(var(--vibrato-amplitude-negative, 0px), -50%);
+	}
+	50% {
+		transform: translate(var(--vibrato-amplitude, 0px), -50%);
+	}
+	100% {
+		transform: translate(var(--vibrato-amplitude-negative, 0px), -50%);
+	}
+}
+
+dial-knob {
+	display: inline-block;
+	vertical-align: middle;
+	width: 2rem;
+	height: 2rem;
+	> svg {
+		display: block;
+		width: 100%;
+		height: 100%;
+		touch-action: none;
+		user-select: none;
+
+		circle.svg-knob {
+			fill: rgb(37, 7, 30);
+		}
+		circle.svg-knob-dot {
+			fill: rgb(124, 102, 102);
+		}
+	}
+}

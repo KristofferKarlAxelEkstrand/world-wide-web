@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>Wuug</title>
+	</head>
+	<body>
+		<wuug-app>
+			<div class="theremin-settings">
+				<div class="theremin-settings-group">
+					Volume
+					<div>
+						<div>
+							<dial-knob min="0" max="1" value="0.5" step="0.001" setting-group="volume" setting-name="volume"></dial-knob>
+							Volume
+						</div>
+					</div>
+				</div>
+
+				<div class="theremin-settings-group">
+					Smoothing
+					<div>
+						<div>
+							<dial-knob min="0" max="0.999" value="0.2" step="0.001" setting-group="smoothingFactors" setting-name="pitch"></dial-knob>
+							Pitch
+						</div>
+						<div>
+							<dial-knob min="0" max="0.999" value="0.2" step="0.001" setting-group="smoothingFactors" setting-name="gain"></dial-knob>
+							Amplitude
+						</div>
+					</div>
+				</div>
+				<div class="theremin-settings-group">
+					Vibrato
+					<div>
+						<div>
+							<dial-knob min="0" max="10" value="6.7" step="0.001" setting-group="vibrato" setting-name="frequency"></dial-knob>
+							Speed
+						</div>
+						<div>
+							<dial-knob min="0" max="30" value="3" step="0.001" setting-group="vibrato" setting-name="amplitude"></dial-knob>
+							Amplitude
+						</div>
+					</div>
+				</div>
+				<div class="theremin-settings-group">
+					vibratoExpression 
+					<div>
+						<div>
+							<dial-knob min="0" max="10" value="5" step="0.001" setting-group="vibratoExpression" setting-name="frequency"></dial-knob>
+							Speed
+						</div>
+						<div>
+							<dial-knob min="0" max="30" value="12.6" step="0.001" setting-group="vibratoExpression" setting-name="amplitude"></dial-knob>
+							Amplitude
+						</div>
+					</div>
+				</div>
+				<div class="theremin-settings-buttons">
+					<button class="fullscreen-button"></button>
+					<button class="osc-shape" shape="sawtooth">sawtooth</button>
+					<button class="osc-shape" shape="sine">sine</button>
+					<button class="osc-shape" shape="square">square</button>
+					<button class="osc-shape" shape="triangle">triangle</button>
+				</div>
+			</div>
+			<div class="theremin-xy-pad">
+				<div class="note-matrix"></div>
+				<div class="indicator"></div>
+			</div>
+		</wuug-app>
+		<script type="module" src="./script.js"></script>
+	</body>
+</html>
