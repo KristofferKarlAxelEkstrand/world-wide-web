@@ -32,6 +32,7 @@ class WuugApp extends HTMLElement {
 		this.mainFrequency = 440;
 		this.targetFrequency = 440;
 		this.pitchValue = 0; // Default pitch multiplier
+		this.finePitchValue = 0; // Initialize fine pitch value
 
 		this.audioCtx = new (window.AudioContext || window?.webkitAudioContext)();
 
@@ -138,27 +139,16 @@ class WuugApp extends HTMLElement {
 			</div>
 		`;
 
-		// Sticky zero for pitch slider
-		const osc1Pitch = this.querySelector('#osc1-pitch');
-		osc1Pitch.addEventListener('input', (e) => {
-			let value = parseFloat(e.target.value);
-			// If near zero, snap to zero
-			if (Math.abs(value) < 0.2) {
-				value = 0;
-				e.target.value = 0;
-			}
-			this.pitchValue = value;
-			const adjustedFreq = this.mainFrequency * Math.pow(2, value / 12);
-			this.querySelector('#osc1-pitch-value').textContent = adjustedFreq.toFixed(2);
-		});
-
 		const oscOnePitch = this.querySelector('#osc1-pitch');
 		oscOnePitch.addEventListener('input', (e) => {
 			const pitchValue = parseFloat(e.target.value); // This is already -12 to +12
 			this.pitchValue = pitchValue; // Use directly, don't add 1
+		});
 
-			// Calculate the actual frequency with the pitch offset
-			const adjustedFreq = this.mainFrequency * Math.pow(2, this.pitchValue / 12);
+		const finePitchInput = this.querySelector('#osc1-pitch-fine');
+		finePitchInput.addEventListener('input', (e) => {
+			const finePitchValue = finePitchInput ? parseFloat(e.target.value) : 0;
+			this.finePitchValue = finePitchValue;
 		});
 
 		// MIDI support
@@ -205,7 +195,10 @@ class WuugApp extends HTMLElement {
 		const animate = () => {
 			this.mainFrequency = this.#linearInterpolation(this.mainFrequency, this.targetFrequency, 0.9);
 
-			this.frequencyOscillatorOne = this.mainFrequency * Math.pow(2, this.pitchValue / 12);
+			// Total pitch offset in semitones (finePitchValue is in semitones, e.g. -1 to +1)
+			const totalPitch = this.pitchValue + this.finePitchValue;
+			this.frequencyOscillatorOne = this.mainFrequency * Math.pow(2, totalPitch / 12);
+
 			this.oscillatorOne.frequency.setTargetAtTime(this.frequencyOscillatorOne, this.audioCtx.currentTime, 0.01);
 
 			// Smoothly ramp oscillatorTwo's frequency to mainFrequency over 0.1 seconds
