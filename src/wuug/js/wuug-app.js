@@ -30,7 +30,7 @@ class WuugApp extends HTMLElement {
 
 		// Mixer
 		this.mixer = this.audioCtx.createGain();
-		this.mixer.gain.value = 0.75;
+		this.mixer.gain.value = 0.5;
 
 		// Filter
 		this.filter = this.audioCtx.createBiquadFilter();
@@ -42,21 +42,40 @@ class WuugApp extends HTMLElement {
 		this.amp = this.audioCtx.createGain();
 		this.amp.gain.value = 1;
 
-		// Connect nodes
-
-		this.oscillatorOneGain.connect(this.mixer);
-		this.oscillatorTwoGain.connect(this.mixer);
-
-		this.mixer.connect(this.filter);
-		this.filter.connect(this.amp);
-		this.amp.connect(this.audioCtx.destination);
-
 		// Start oscillators
 		this.oscillatorOne.start();
 		this.oscillatorTwo.start();
 
 		// State
 		this.currentNote = null;
+
+		this.waveShaperOscillators = this.audioCtx.createWaveShaper();
+		this.waveShaperOscillators.curve = new Float32Array(256).map((_, i) => {
+			const x = i / 128 - 1;
+			return Math.tanh(3 * x); // simple soft clipping
+		});
+		this.waveShaperOscillators.oversample = '2x';
+
+		this.waveShaperFilter = this.audioCtx.createWaveShaper();
+		// Very soft tube distortion curve
+		const curve = new Float32Array(256);
+		for (let i = 0; i < 256; ++i) {
+			const x = (i / 255) * 2 - 1;
+			// Softer tube-like curve
+			curve[i] = Math.tanh(1.2 * x);
+		}
+		this.waveShaperFilter.curve = curve;
+		this.waveShaperFilter.oversample = '2x';
+
+		// Connect nodes
+
+		this.oscillatorOneGain.connect(this.mixer);
+		this.oscillatorTwoGain.connect(this.mixer);
+		this.mixer.connect(this.waveShaperOscillators);
+		this.waveShaperOscillators.connect(this.filter);
+		this.filter.connect(this.waveShaperFilter);
+		this.waveShaperFilter.connect(this.amp);
+		this.amp.connect(this.audioCtx.destination);
 	}
 
 	connectedCallback() {
@@ -127,8 +146,8 @@ class WuugApp extends HTMLElement {
 		const now = this.audioCtx.currentTime;
 		const filterFreq = this.filter.frequency;
 		filterFreq.cancelScheduledValues(now);
-		filterFreq.setTargetAtTime(2000, now, 0.15); // smooth attack to 2000Hz
-		filterFreq.setTargetAtTime(1000, now + 0.3, 0.2); // smooth decay to 1000Hz
+		filterFreq.setTargetAtTime(2000, now, 0.05); // smooth attack to 2000Hz
+		filterFreq.setTargetAtTime(400, now + 0.3, 0.2); // smooth decay to 1000Hz
 
 		if (this.envelopeTimeout) clearTimeout(this.envelopeTimeout);
 	}
@@ -137,7 +156,7 @@ class WuugApp extends HTMLElement {
 		const now = this.audioCtx.currentTime;
 		const filterFreq = this.filter.frequency;
 		filterFreq.cancelScheduledValues(now);
-		filterFreq.setTargetAtTime(200, now, 0.15); // smooth release to 200Hz
+		filterFreq.setTargetAtTime(40, now, 0.15); // smooth release to 200Hz
 	}
 }
 
