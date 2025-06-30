@@ -6,6 +6,29 @@ class WuugApp extends HTMLElement {
 	constructor() {
 		super();
 
+		this.state = {
+			oscillators: {
+				sub: {
+					frequency: 440,
+					type: 'sine',
+					gain: 0.5,
+					chaos: 0.1,
+				},
+				one: {
+					frequency: 440,
+					type: 'sawtooth',
+					gain: 0.5,
+					chaos: 0.1,
+				},
+				two: {
+					frequency: 440,
+					type: 'sawtooth',
+					gain: 0.5,
+					chaos: 0.1,
+				},
+			},
+		};
+
 		this.mainFrequency = 440;
 
 		this.audioCtx = new (window.AudioContext || window?.webkitAudioContext)();
@@ -42,9 +65,16 @@ class WuugApp extends HTMLElement {
 		this.amp = this.audioCtx.createGain();
 		this.amp.gain.value = 1;
 
-		// Start oscillators
-		this.oscillatorOne.start();
-		this.oscillatorTwo.start();
+		// Oscillator start will be triggered after user interaction
+		this.oscillatorsStarted = false;
+
+		this.startOscillators = () => {
+			if (!this.oscillatorsStarted) {
+				this.oscillatorOne.start();
+				this.oscillatorTwo.start();
+				this.oscillatorsStarted = true;
+			}
+		};
 
 		// State
 		this.currentNote = null;
@@ -79,6 +109,9 @@ class WuugApp extends HTMLElement {
 	}
 
 	connectedCallback() {
+		window.addEventListener('pointerdown', this.resumeAndStart);
+		window.addEventListener('keydown', this.resumeAndStart);
+
 		this.innerHTML = `
 			<div class="controls">
 				<button id="play">Play</button>
@@ -139,6 +172,14 @@ class WuugApp extends HTMLElement {
 		};
 		animate();
 	}
+
+	resumeAndStart = () => {
+		this.audioCtx.resume().then(() => {
+			this.startOscillators();
+		});
+		window.removeEventListener('pointerdown', this.resumeAndStart);
+		window.removeEventListener('keydown', this.resumeAndStart);
+	};
 
 	openFilter() {
 		this.currentNote = this.mainFrequency;
