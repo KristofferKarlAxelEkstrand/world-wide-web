@@ -200,20 +200,15 @@ theremin-app {
 	}
 }
 
-//				this.indicator.style.setProperty('--vibrato-duration', `${duration}s`);
-//				this.indicator.style.setProperty('--vibrato-amplitude', `${vibratoAmplitude}px`);
-//				this.indicator.style.setProperty('--vibrato-amplitude-negative', `${-vibratoAmplitude}px`);
-//			}
-
 @keyframes vibrato-indicator {
 	0% {
-		transform: translateX(var(--vibrato-amplitude-negative));
+		transform: translate(var(--vibrato-amplitude-negative, 0px), -50%);
 	}
 	50% {
-		transform: translateX(var(--vibrato-amplitude));
+		transform: translate(var(--vibrato-amplitude, 0px), -50%);
 	}
 	100% {
-		transform: translateX(var(--vibrato-amplitude-negative));
+		transform: translate(var(--vibrato-amplitude-negative, 0px), -50%);
 	}
 }
 
