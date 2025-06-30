@@ -193,7 +193,7 @@ class WuugApp extends HTMLElement {
 		this.envelopeTimeout = null;
 
 		const animate = () => {
-			this.mainFrequency = this.#linearInterpolation(this.mainFrequency, this.targetFrequency, 0.9);
+			this.mainFrequency = this.#linearInterpolation((this.mainFrequency += (Math.random() - 0.5) * 50), this.targetFrequency, 0.9);
 
 			// Total pitch offset in semitones (finePitchValue is in semitones, e.g. -1 to +1)
 			const totalPitch = this.pitchValue + this.finePitchValue;
