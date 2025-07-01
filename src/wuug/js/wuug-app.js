@@ -25,36 +25,35 @@ class WuugApp extends HTMLElement {
 			},
 		};
 
-		this.oscillatorOneTargetFrequency = 440;
-		this.oscillatorTwoTargetFrequency = 440;
-		this.oscillatorOneMainFrequency = 440;
-		this.oscillatorTwoMainFrequency = 440;
-
 		this.audioCtx = new (window.AudioContext || window['webkitAudioContext'])();
 
 		// Oscillators
 
 		this.oscillatorSub = this.audioCtx.createOscillator();
 
-		this.oscillatorOne = this.audioCtx.createOscillator();
-		this.oscillatorOne.type = 'sawtooth';
-		this.oscillatorOne.frequency.value = this.oscillatorOneMainFrequency;
-		this.oscillatorOneGain = this.audioCtx.createGain();
-		this.oscillatorOneGain.gain.value = 0.5;
-		this.oscillatorOne.connect(this.oscillatorOneGain);
-
+		this.oscillatorOne_TargetFrequency = 440;
+		this.oscillatorOne_MainFrequency = 440;
 		this.oscillatorOne_PitchValue = 0;
 		this.oscillatorOne_FinePitchValue = 0;
 
+		this.oscillatorOne = this.audioCtx.createOscillator();
+		this.oscillatorOne.type = 'sawtooth';
+		this.oscillatorOne.frequency.value = this.oscillatorOne_MainFrequency;
+		this.oscillatorOne_Gain = this.audioCtx.createGain();
+		this.oscillatorOne_Gain.gain.value = 0.5;
+		this.oscillatorOne.connect(this.oscillatorOne_Gain);
+
+		this.oscillatorTwo_TargetFrequency = 440;
+		this.oscillatorTwo_MainFrequency = 440;
+		this.oscillatorTwo_PitchValue = 0;
+		this.oscillatorTwo_FinePitchValue = 0;
+
 		this.oscillatorTwo = this.audioCtx.createOscillator();
 		this.oscillatorTwo.type = 'sawtooth';
-		this.oscillatorTwo.frequency.value = this.oscillatorTwoMainFrequency;
+		this.oscillatorTwo.frequency.value = this.oscillatorTwo_MainFrequency;
 		this.oscillatorTwoGain = this.audioCtx.createGain();
 		this.oscillatorTwoGain.gain.value = 0.5;
 		this.oscillatorTwo.connect(this.oscillatorTwoGain);
-
-		this.oscillatorTwo_PitchValue = 0;
-		this.oscillatorTwo_FinePitchValue = 0;
 
 		// Mixer
 		this.mixer = this.audioCtx.createGain();
@@ -102,7 +101,7 @@ class WuugApp extends HTMLElement {
 
 		// Connect nodes
 
-		this.oscillatorOneGain.connect(this.mixer);
+		this.oscillatorOne_Gain.connect(this.mixer);
 		this.oscillatorTwoGain.connect(this.mixer);
 		this.mixer.connect(this.waveShaperOscillators);
 		this.waveShaperOscillators.connect(this.filter);
@@ -153,7 +152,7 @@ class WuugApp extends HTMLElement {
 		const oscOneVolume = this.querySelector('#osc1-volume');
 		oscOneVolume.addEventListener('input', (e) => {
 			const gainValue = parseFloat(e.target.value);
-			this.oscillatorOneGain.gain.value = gainValue;
+			this.oscillatorOne_Gain.gain.value = gainValue;
 		});
 
 		this.heldNotes = new Set();
@@ -166,8 +165,8 @@ class WuugApp extends HTMLElement {
 						if (command === 0x90 && data2 > 0) {
 							const freq = 440 * Math.pow(2, (data1 - 69) / 12);
 
-							this.oscillatorOneTargetFrequency = freq * (1 + (Math.random() - 0.5) * 0.02);
-							this.oscillatorTwoTargetFrequency = freq * (1 + (Math.random() - 0.5) * 0.02);
+							this.oscillatorOne_TargetFrequency = freq * (1 + (Math.random() - 0.5) * 0.02);
+							this.oscillatorTwo_TargetFrequency = freq * (1 + (Math.random() - 0.5) * 0.02);
 
 							if (!this.heldNotes.has(data1)) {
 								this.heldNotes.add(data1);
@@ -183,8 +182,8 @@ class WuugApp extends HTMLElement {
 							} else {
 								const nextNote = this.heldNotes.values().next().value;
 								const freq = 440 * Math.pow(2, (nextNote - 69) / 12);
-								this.oscillatorOneTargetFrequency = freq * (1 + (Math.random() - 0.5) * 0.02);
-								this.oscillatorTwoTargetFrequency = freq * (1 + (Math.random() - 0.5) * 0.02);
+								this.oscillatorOne_TargetFrequency = freq * (1 + (Math.random() - 0.5) * 0.02);
+								this.oscillatorTwo_TargetFrequency = freq * (1 + (Math.random() - 0.5) * 0.02);
 							}
 						}
 					};
@@ -197,17 +196,17 @@ class WuugApp extends HTMLElement {
 		this.envelopeTimeout = null;
 
 		const animate = () => {
-			this.oscillatorOneMainFrequency = this.#linearInterpolation((this.oscillatorOneMainFrequency += (Math.random() - 0.5) * 0.5), this.oscillatorOneTargetFrequency, 0.9);
-			this.oscillatorTwoMainFrequency = this.#linearInterpolation((this.oscillatorTwoMainFrequency += (Math.random() - 0.5) * 0.5), this.oscillatorTwoTargetFrequency, 0.9);
+			this.oscillatorOne_MainFrequency = this.#linearInterpolation((this.oscillatorOne_MainFrequency += (Math.random() - 0.5) * 0.5), this.oscillatorOne_TargetFrequency, 0.9);
+			this.oscillatorTwo_MainFrequency = this.#linearInterpolation((this.oscillatorTwo_MainFrequency += (Math.random() - 0.5) * 0.5), this.oscillatorTwo_TargetFrequency, 0.9);
 
 			const oscillatorOneTotalPitch = this.oscillatorOne_PitchValue + this.oscillatorOne_FinePitchValue;
-			this.frequencyOscillatorOne = this.oscillatorOneMainFrequency * Math.pow(2, oscillatorOneTotalPitch / 12);
+			this.frequencyOscillatorOne = this.oscillatorOne_MainFrequency * Math.pow(2, oscillatorOneTotalPitch / 12);
 
 			const oscillatorTwoTotalPitch = this.oscillatorOne_PitchValue + this.oscillatorTwo_FinePitchValue;
-			this.frequencyOscillatorTwo = this.oscillatorTwoMainFrequency * Math.pow(2, oscillatorTwoTotalPitch / 12);
+			this.frequencyOscillatorTwo = this.oscillatorTwo_MainFrequency * Math.pow(2, oscillatorTwoTotalPitch / 12);
 
 			this.oscillatorOne.frequency.setTargetAtTime(this.frequencyOscillatorOne, this.audioCtx.currentTime, 0.01);
-			this.oscillatorOneGain.gain.setTargetAtTime(this.oscillatorOneGain.gain.value, this.audioCtx.currentTime, 0.01);
+			this.oscillatorOne_Gain.gain.setTargetAtTime(this.oscillatorOne_Gain.gain.value, this.audioCtx.currentTime, 0.01);
 
 			this.oscillatorTwo.frequency.setTargetAtTime(this.frequencyOscillatorTwo, this.audioCtx.currentTime, 0.01);
 
@@ -225,7 +224,7 @@ class WuugApp extends HTMLElement {
 	};
 
 	openFilter() {
-		this.currentNote = this.oscillatorOneMainFrequency;
+		this.currentNote = this.oscillatorOne_MainFrequency;
 
 		const now = this.audioCtx.currentTime;
 		const filterFreq = this.filter.frequency;
