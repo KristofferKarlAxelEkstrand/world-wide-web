@@ -1,7 +1,3 @@
-import { getNoteArray } from './get-note-array.js';
-
-class SpecialOscilator extends OscillatorNode {}
-
 class WuugApp extends HTMLElement {
 	constructor() {
 		super();
@@ -29,12 +25,12 @@ class WuugApp extends HTMLElement {
 			},
 		};
 
-		this.mainFrequency = 440;
-		this.targetFrequency = 440;
-		this.pitchValue = 0; // Default pitch multiplier
-		this.finePitchValue = 0; // Initialize fine pitch value
+		this.oscillatorOneTargetFrequency = 440;
+		this.oscillatorTwoTargetFrequency = 440;
+		this.oscillatorOneMainFrequency = 440;
+		this.oscillatorTwoMainFrequency = 440;
 
-		this.audioCtx = new (window.AudioContext || window?.webkitAudioContext)();
+		this.audioCtx = new (window.AudioContext || window['webkitAudioContext'])();
 
 		// Oscillators
 
@@ -42,17 +38,23 @@ class WuugApp extends HTMLElement {
 
 		this.oscillatorOne = this.audioCtx.createOscillator();
 		this.oscillatorOne.type = 'sawtooth';
-		this.oscillatorOne.frequency.value = this.mainFrequency;
+		this.oscillatorOne.frequency.value = this.oscillatorOneMainFrequency;
 		this.oscillatorOneGain = this.audioCtx.createGain();
 		this.oscillatorOneGain.gain.value = 0.5;
 		this.oscillatorOne.connect(this.oscillatorOneGain);
 
+		this.oscillatorOne_PitchValue = 0;
+		this.oscillatorOne_FinePitchValue = 0;
+
 		this.oscillatorTwo = this.audioCtx.createOscillator();
 		this.oscillatorTwo.type = 'sawtooth';
-		this.oscillatorTwo.frequency.value = this.mainFrequency;
+		this.oscillatorTwo.frequency.value = this.oscillatorTwoMainFrequency;
 		this.oscillatorTwoGain = this.audioCtx.createGain();
 		this.oscillatorTwoGain.gain.value = 0.5;
 		this.oscillatorTwo.connect(this.oscillatorTwoGain);
+
+		this.oscillatorTwo_PitchValue = 0;
+		this.oscillatorTwo_FinePitchValue = 0;
 
 		// Mixer
 		this.mixer = this.audioCtx.createGain();
@@ -116,20 +118,17 @@ class WuugApp extends HTMLElement {
 		window.addEventListener('keydown', this.resumeAndStart);
 
 		this.innerHTML = `
-			<div class="controls">
-				<button id="play">Play</button>
-				<button id="stop">Stop</button>
-			</div>
+
 			<div class="oscillator-controls">
 				<label>
 					Pitch:
 					<input type="range" id="osc1-pitch" min="-24" max="24" value="0" step="1">
-					<span id="osc1-pitch-value">440</span> Hz
+				<span id="osc1-pitch-value">440</span> Hz
 				</label>
 				<label>
 					Fine pitch:
 					<input type="range" id="osc1-pitch-fine" min="-1" max="1" value="0" step="0.01">
-					<span id="osc1-pitch-value">440</span> Hz
+					<span id="osc1-pitch-fine-value">440</span> Hz
 				</label>
 				<label>
 					Volume:
@@ -141,14 +140,14 @@ class WuugApp extends HTMLElement {
 
 		const oscOnePitch = this.querySelector('#osc1-pitch');
 		oscOnePitch.addEventListener('input', (e) => {
-			const pitchValue = parseFloat(e.target.value); // This is already -12 to +12
-			this.pitchValue = pitchValue; // Use directly, don't add 1
+			const pitchValue = parseFloat(e.target.value);
+			this.oscillatorOne_PitchValue = pitchValue;
 		});
 
 		const finePitchInput = this.querySelector('#osc1-pitch-fine');
 		finePitchInput.addEventListener('input', (e) => {
 			const finePitchValue = finePitchInput ? parseFloat(e.target.value) : 0;
-			this.finePitchValue = finePitchValue;
+			this.oscillatorOne_FinePitchValue = finePitchValue;
 		});
 
 		const oscOneVolume = this.querySelector('#osc1-volume');
@@ -157,7 +156,6 @@ class WuugApp extends HTMLElement {
 			this.oscillatorOneGain.gain.value = gainValue;
 		});
 
-		// MIDI support
 		this.heldNotes = new Set();
 		if (navigator.requestMIDIAccess) {
 			navigator.requestMIDIAccess().then((midiAccess) => {
@@ -168,7 +166,8 @@ class WuugApp extends HTMLElement {
 						if (command === 0x90 && data2 > 0) {
 							const freq = 440 * Math.pow(2, (data1 - 69) / 12);
 
-							this.targetFrequency = freq;
+							this.oscillatorOneTargetFrequency = freq * (1 + (Math.random() - 0.5) * 0.02);
+							this.oscillatorTwoTargetFrequency = freq * (1 + (Math.random() - 0.5) * 0.02);
 
 							if (!this.heldNotes.has(data1)) {
 								this.heldNotes.add(data1);
@@ -184,7 +183,8 @@ class WuugApp extends HTMLElement {
 							} else {
 								const nextNote = this.heldNotes.values().next().value;
 								const freq = 440 * Math.pow(2, (nextNote - 69) / 12);
-								this.targetFrequency = freq;
+								this.oscillatorOneTargetFrequency = freq * (1 + (Math.random() - 0.5) * 0.02);
+								this.oscillatorTwoTargetFrequency = freq * (1 + (Math.random() - 0.5) * 0.02);
 							}
 						}
 					};
@@ -197,15 +197,19 @@ class WuugApp extends HTMLElement {
 		this.envelopeTimeout = null;
 
 		const animate = () => {
-			this.mainFrequency = this.#linearInterpolation((this.mainFrequency += (Math.random() - 0.5) * 50), this.targetFrequency, 0.9);
+			this.oscillatorOneMainFrequency = this.#linearInterpolation((this.oscillatorOneMainFrequency += (Math.random() - 0.5) * 0.5), this.oscillatorOneTargetFrequency, 0.9);
+			this.oscillatorTwoMainFrequency = this.#linearInterpolation((this.oscillatorTwoMainFrequency += (Math.random() - 0.5) * 0.5), this.oscillatorTwoTargetFrequency, 0.9);
 
-			const totalPitch = this.pitchValue + this.finePitchValue;
-			this.frequencyOscillatorOne = this.mainFrequency * Math.pow(2, totalPitch / 12);
+			const oscillatorOneTotalPitch = this.oscillatorOne_PitchValue + this.oscillatorOne_FinePitchValue;
+			this.frequencyOscillatorOne = this.oscillatorOneMainFrequency * Math.pow(2, oscillatorOneTotalPitch / 12);
+
+			const oscillatorTwoTotalPitch = this.oscillatorOne_PitchValue + this.oscillatorTwo_FinePitchValue;
+			this.frequencyOscillatorTwo = this.oscillatorTwoMainFrequency * Math.pow(2, oscillatorTwoTotalPitch / 12);
 
 			this.oscillatorOne.frequency.setTargetAtTime(this.frequencyOscillatorOne, this.audioCtx.currentTime, 0.01);
 			this.oscillatorOneGain.gain.setTargetAtTime(this.oscillatorOneGain.gain.value, this.audioCtx.currentTime, 0.01);
 
-			this.oscillatorTwo.frequency.setTargetAtTime(this.mainFrequency, this.audioCtx.currentTime, 0.01);
+			this.oscillatorTwo.frequency.setTargetAtTime(this.frequencyOscillatorTwo, this.audioCtx.currentTime, 0.01);
 
 			requestAnimationFrame(animate);
 		};
@@ -221,7 +225,7 @@ class WuugApp extends HTMLElement {
 	};
 
 	openFilter() {
-		this.currentNote = this.mainFrequency;
+		this.currentNote = this.oscillatorOneMainFrequency;
 
 		const now = this.audioCtx.currentTime;
 		const filterFreq = this.filter.frequency;
