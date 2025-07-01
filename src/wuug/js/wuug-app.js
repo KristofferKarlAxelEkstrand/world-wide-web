@@ -67,17 +67,20 @@ class WuugApp extends HTMLElement {
 		this.oscillatorTwoGain.gain.value = 0.5;
 		this.oscillatorTwo.connect(this.oscillatorTwoGain);
 
-		// Mixer
+		/* Mixer ----------------------------------------------- */
+
 		this.mixer = this.audioCtx.createGain();
 		this.mixer.gain.value = 0.4;
 
-		// Filter
+		/* Mixer ----------------------------------------------- */
+
 		this.filter = this.audioCtx.createBiquadFilter();
 		this.filter.type = 'lowpass';
 		this.filter.frequency.value = 1000;
 		this.filter.Q.value = 1;
 
-		// Amp (always on)
+		/* AMP ----------------------------------------------- */
+
 		this.amp = this.audioCtx.createGain();
 		this.amp.gain.value = 1;
 
