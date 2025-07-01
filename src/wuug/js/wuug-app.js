@@ -31,26 +31,38 @@ class WuugApp extends HTMLElement {
 
 		this.oscillatorSub = this.audioCtx.createOscillator();
 
+		/* ONE ----------------------------------------------- */
+
+		/* Vars */
 		this.oscillatorOne_TargetFrequency = 440;
 		this.oscillatorOne_MainFrequency = 440;
 		this.oscillatorOne_PitchValue = 0;
 		this.oscillatorOne_FinePitchValue = 0;
 
+		/* Oscillator */
 		this.oscillatorOne = this.audioCtx.createOscillator();
 		this.oscillatorOne.type = 'sawtooth';
 		this.oscillatorOne.frequency.value = this.oscillatorOne_MainFrequency;
+
+		/* Gain */
 		this.oscillatorOne_Gain = this.audioCtx.createGain();
 		this.oscillatorOne_Gain.gain.value = 0.5;
 		this.oscillatorOne.connect(this.oscillatorOne_Gain);
 
+		/* ONE ----------------------------------------------- */
+
+		/* Vars */
 		this.oscillatorTwo_TargetFrequency = 440;
 		this.oscillatorTwo_MainFrequency = 440;
 		this.oscillatorTwo_PitchValue = 0;
 		this.oscillatorTwo_FinePitchValue = 0;
 
+		/* Oscillator */
 		this.oscillatorTwo = this.audioCtx.createOscillator();
 		this.oscillatorTwo.type = 'sawtooth';
 		this.oscillatorTwo.frequency.value = this.oscillatorTwo_MainFrequency;
+
+		/* Gain */
 		this.oscillatorTwoGain = this.audioCtx.createGain();
 		this.oscillatorTwoGain.gain.value = 0.5;
 		this.oscillatorTwo.connect(this.oscillatorTwoGain);
