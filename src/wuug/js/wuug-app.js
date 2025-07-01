@@ -38,6 +38,8 @@ class WuugApp extends HTMLElement {
 		this.oscillatorOne_MainFrequency = 440;
 		this.oscillatorOne_PitchValue = 0;
 		this.oscillatorOne_FinePitchValue = 0;
+		this.oscillatorOne_Unstable = 1000;
+		this.oscillatorOne_S_Gain = 0.5;
 
 		/* Oscillator */
 		this.oscillatorOne = this.audioCtx.createOscillator();
@@ -49,13 +51,15 @@ class WuugApp extends HTMLElement {
 		this.oscillatorOne_Gain.gain.value = 0.5;
 		this.oscillatorOne.connect(this.oscillatorOne_Gain);
 
-		/* ONE ----------------------------------------------- */
+		/* TWO ----------------------------------------------- */
 
 		/* Vars */
 		this.oscillatorTwo_TargetFrequency = 440;
 		this.oscillatorTwo_MainFrequency = 440;
 		this.oscillatorTwo_PitchValue = 0;
 		this.oscillatorTwo_FinePitchValue = 0;
+		this.oscillatorTwo_Unstable = 1000;
+		this.oscillatorTwo_S_Gain = 0.5;
 
 		/* Oscillator */
 		this.oscillatorTwo = this.audioCtx.createOscillator();
@@ -63,9 +67,9 @@ class WuugApp extends HTMLElement {
 		this.oscillatorTwo.frequency.value = this.oscillatorTwo_MainFrequency;
 
 		/* Gain */
-		this.oscillatorTwoGain = this.audioCtx.createGain();
-		this.oscillatorTwoGain.gain.value = 0.5;
-		this.oscillatorTwo.connect(this.oscillatorTwoGain);
+		this.oscillatorTwo_Gain = this.audioCtx.createGain();
+		this.oscillatorTwo_Gain.gain.value = 0.5;
+		this.oscillatorTwo.connect(this.oscillatorTwo_Gain);
 
 		/* Mixer ----------------------------------------------- */
 
@@ -117,7 +121,7 @@ class WuugApp extends HTMLElement {
 		// Connect nodes
 
 		this.oscillatorOne_Gain.connect(this.mixer);
-		this.oscillatorTwoGain.connect(this.mixer);
+		this.oscillatorTwo_Gain.connect(this.mixer);
 		this.mixer.connect(this.waveShaperOscillators);
 		this.waveShaperOscillators.connect(this.filter);
 		this.filter.connect(this.waveShaperFilter);
@@ -127,48 +131,29 @@ class WuugApp extends HTMLElement {
 
 	#linearInterpolation = (a, b, t) => a + (b - a) * t;
 
+	inputSetter(varName, value) {
+		this[varName] = value;
+	}
+
 	connectedCallback() {
 		window.addEventListener('pointerdown', this.resumeAndStart);
 		window.addEventListener('keydown', this.resumeAndStart);
 
 		this.innerHTML = `
+			<div class="oscillator-controls">
+				<wuug-nr-input data-variable="oscillatorOne_PitchValue" min="-24" max="24" value="0" step="1" label="Oscillator 1 Pitch"></wuug-nr-input>
+				<wuug-nr-input data-variable="oscillatorOne_FinePitchValue" min="-1" max="1" value="0" step="0.01" label="Fine pitch"></wuug-nr-input>
+				<wuug-nr-input data-variable="oscillatorOne_S_Gain" min="0" max="1" value="0.5" step="0.01" label="Gain"></wuug-nr-input>
+				<wuug-nr-input data-variable="oscillatorOne_Unstable" min="0" max="300" value="50" step="0.01" label="Unstable"></wuug-nr-input>
+			</div>
 
 			<div class="oscillator-controls">
-				<label>
-					Pitch:
-					<input type="range" id="osc1-pitch" min="-24" max="24" value="0" step="1">
-				<span id="osc1-pitch-value">440</span> Hz
-				</label>
-				<label>
-					Fine pitch:
-					<input type="range" id="osc1-pitch-fine" min="-1" max="1" value="0" step="0.01">
-					<span id="osc1-pitch-fine-value">440</span> Hz
-				</label>
-				<label>
-					Volume:
-					<input type="range" id="osc1-volume" min="0" max="1" value="0.5" step="0.01">
-					<span id="osc1-volume-value">0.5</span>
-				</label>
+				<wuug-nr-input data-variable="oscillatorTwo_PitchValue" min="-24" max="24" value="0" step="1" label="Oscillator 2 Pitch"></wuug-nr-input>
+				<wuug-nr-input data-variable="oscillatorTwo_FinePitchValue" min="-1" max="1" value="0" step="0.01" label="Fine pitch"></wuug-nr-input>
+				<wuug-nr-input data-variable="oscillatorTwo_S_Gain" min="0" max="1" value="0.5" step="0.01" label="Gain"></wuug-nr-input>
+				<wuug-nr-input data-variable="oscillatorTwo_Unstable" min="0" max="300" value="50" step="0.01" label="Unstable"></wuug-nr-input>
 			</div>
 		`;
-
-		const oscOnePitch = this.querySelector('#osc1-pitch');
-		oscOnePitch.addEventListener('input', (e) => {
-			const pitchValue = parseFloat(e.target.value);
-			this.oscillatorOne_PitchValue = pitchValue;
-		});
-
-		const finePitchInput = this.querySelector('#osc1-pitch-fine');
-		finePitchInput.addEventListener('input', (e) => {
-			const finePitchValue = finePitchInput ? parseFloat(e.target.value) : 0;
-			this.oscillatorOne_FinePitchValue = finePitchValue;
-		});
-
-		const oscOneVolume = this.querySelector('#osc1-volume');
-		oscOneVolume.addEventListener('input', (e) => {
-			const gainValue = parseFloat(e.target.value);
-			this.oscillatorOne_Gain.gain.value = gainValue;
-		});
 
 		this.heldNotes = new Set();
 		if (navigator.requestMIDIAccess) {
@@ -211,19 +196,18 @@ class WuugApp extends HTMLElement {
 		this.envelopeTimeout = null;
 
 		const animate = () => {
-			this.oscillatorOne_MainFrequency = this.#linearInterpolation((this.oscillatorOne_MainFrequency += (Math.random() - 0.5) * 0.5), this.oscillatorOne_TargetFrequency, 0.9);
-			this.oscillatorTwo_MainFrequency = this.#linearInterpolation((this.oscillatorTwo_MainFrequency += (Math.random() - 0.5) * 0.5), this.oscillatorTwo_TargetFrequency, 0.9);
+			this.oscillatorOne_MainFrequency = this.#linearInterpolation((this.oscillatorOne_MainFrequency += (Math.random() - 0.5) * this.oscillatorOne_Unstable), this.oscillatorOne_TargetFrequency, 0.9);
+			this.oscillatorTwo_MainFrequency = this.#linearInterpolation((this.oscillatorTwo_MainFrequency += (Math.random() - 0.5) * this.oscillatorTwo_Unstable), this.oscillatorTwo_TargetFrequency, 0.9);
 
 			const oscillatorOneTotalPitch = this.oscillatorOne_PitchValue + this.oscillatorOne_FinePitchValue;
 			this.frequencyOscillatorOne = this.oscillatorOne_MainFrequency * Math.pow(2, oscillatorOneTotalPitch / 12);
-
-			const oscillatorTwoTotalPitch = this.oscillatorOne_PitchValue + this.oscillatorTwo_FinePitchValue;
-			this.frequencyOscillatorTwo = this.oscillatorTwo_MainFrequency * Math.pow(2, oscillatorTwoTotalPitch / 12);
-
 			this.oscillatorOne.frequency.setTargetAtTime(this.frequencyOscillatorOne, this.audioCtx.currentTime, 0.01);
-			this.oscillatorOne_Gain.gain.setTargetAtTime(this.oscillatorOne_Gain.gain.value, this.audioCtx.currentTime, 0.01);
+			this.oscillatorOne_Gain.gain.setTargetAtTime(this.oscillatorOne_S_Gain, this.audioCtx.currentTime, 0.01);
 
+			const oscillatorTwoTotalPitch = this.oscillatorTwo_PitchValue + this.oscillatorTwo_FinePitchValue;
+			this.frequencyOscillatorTwo = this.oscillatorTwo_MainFrequency * Math.pow(2, oscillatorTwoTotalPitch / 12);
 			this.oscillatorTwo.frequency.setTargetAtTime(this.frequencyOscillatorTwo, this.audioCtx.currentTime, 0.01);
+			this.oscillatorTwo_Gain.gain.setTargetAtTime(this.oscillatorTwo_S_Gain, this.audioCtx.currentTime, 0.01);
 
 			requestAnimationFrame(animate);
 		};
@@ -259,3 +243,55 @@ class WuugApp extends HTMLElement {
 }
 
 customElements.define('wuug-app', WuugApp);
+
+class WuugNrInput extends HTMLElement {
+	constructor() {
+		super();
+		this.wuug = this.closest('wuug-app');
+	}
+
+	connectedCallback() {
+		const min = this.getAttribute('min') || '0';
+		const max = this.getAttribute('max') || '100';
+		const step = this.getAttribute('step') || '1';
+		const value = this.getAttribute('value') || min;
+		const label = this.getAttribute('label') || '';
+
+		this.innerHTML = `
+			<label class="wuug-nr-input-label">
+				${label}
+				<input class="wuug-nr-input-number" type="number" min="${min}" max="${max}" step="${step}" value="${value}">
+			</label>
+		`;
+
+		const input = this.querySelector('.wuug-nr-input-number');
+		input.addEventListener('input', (e) => {
+			if (this.wuug && typeof this.wuug.inputSetter === 'function') {
+				this.wuug.inputSetter(this.getAttribute('data-variable') || 'value', parseFloat(e.target.value));
+			}
+		});
+	}
+
+	static get observedAttributes() {
+		return ['value'];
+	}
+
+	attributeChangedCallback(name, oldValue, newValue) {
+		if (name === 'value') {
+			const input = this.querySelector('.wuug-nr-input-number');
+			if (input && input.value !== newValue) {
+				input.value = newValue;
+			}
+		}
+	}
+
+	get value() {
+		return this.getAttribute('value');
+	}
+
+	set value(val) {
+		this.setAttribute('value', val);
+	}
+}
+
+customElements.define('wuug-nr-input', WuugNrInput);
