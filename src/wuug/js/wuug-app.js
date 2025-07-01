@@ -151,6 +151,12 @@ class WuugApp extends HTMLElement {
 			this.finePitchValue = finePitchValue;
 		});
 
+		const oscOneVolume = this.querySelector('#osc1-volume');
+		oscOneVolume.addEventListener('input', (e) => {
+			const gainValue = parseFloat(e.target.value);
+			this.oscillatorOneGain.gain.value = gainValue;
+		});
+
 		// MIDI support
 		this.heldNotes = new Set();
 		if (navigator.requestMIDIAccess) {
@@ -187,21 +193,18 @@ class WuugApp extends HTMLElement {
 		} else {
 			this.querySelector('.note-display').textContent = 'Web MIDI not supported';
 		}
-		const playButton = this.querySelector('#play');
-		const stopButton = this.querySelector('#stop');
 
 		this.envelopeTimeout = null;
 
 		const animate = () => {
 			this.mainFrequency = this.#linearInterpolation((this.mainFrequency += (Math.random() - 0.5) * 50), this.targetFrequency, 0.9);
 
-			// Total pitch offset in semitones (finePitchValue is in semitones, e.g. -1 to +1)
 			const totalPitch = this.pitchValue + this.finePitchValue;
 			this.frequencyOscillatorOne = this.mainFrequency * Math.pow(2, totalPitch / 12);
 
 			this.oscillatorOne.frequency.setTargetAtTime(this.frequencyOscillatorOne, this.audioCtx.currentTime, 0.01);
+			this.oscillatorOneGain.gain.setTargetAtTime(this.oscillatorOneGain.gain.value, this.audioCtx.currentTime, 0.01);
 
-			// Smoothly ramp oscillatorTwo's frequency to mainFrequency over 0.1 seconds
 			this.oscillatorTwo.frequency.setTargetAtTime(this.mainFrequency, this.audioCtx.currentTime, 0.01);
 
 			requestAnimationFrame(animate);
