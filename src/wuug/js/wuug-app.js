@@ -38,7 +38,7 @@ class WuugApp extends HTMLElement {
 		this.oscillatorOne_MainFrequency = 440;
 		this.oscillatorOne_PitchValue = 0;
 		this.oscillatorOne_FinePitchValue = 0;
-		this.oscillatorOne_Unstable = 1000;
+		this.oscillatorOne_Unstable = 1;
 		this.oscillatorOne_S_Gain = 0.5;
 
 		/* Oscillator */
@@ -58,7 +58,7 @@ class WuugApp extends HTMLElement {
 		this.oscillatorTwo_MainFrequency = 440;
 		this.oscillatorTwo_PitchValue = 0;
 		this.oscillatorTwo_FinePitchValue = 0;
-		this.oscillatorTwo_Unstable = 1000;
+		this.oscillatorTwo_Unstable = 1;
 		this.oscillatorTwo_S_Gain = 0.5;
 
 		/* Oscillator */
@@ -139,21 +139,32 @@ class WuugApp extends HTMLElement {
 		window.addEventListener('pointerdown', this.resumeAndStart);
 		window.addEventListener('keydown', this.resumeAndStart);
 
-		this.innerHTML = `
-			<div class="oscillator-controls">
-				<wuug-nr-input data-variable="oscillatorOne_PitchValue" min="-24" max="24" value="0" step="1" label="Oscillator 1 Pitch"></wuug-nr-input>
-				<wuug-nr-input data-variable="oscillatorOne_FinePitchValue" min="-1" max="1" value="0" step="0.01" label="Fine pitch"></wuug-nr-input>
-				<wuug-nr-input data-variable="oscillatorOne_S_Gain" min="0" max="1" value="0.5" step="0.01" label="Gain"></wuug-nr-input>
-				<wuug-nr-input data-variable="oscillatorOne_Unstable" min="0" max="300" value="50" step="0.01" label="Unstable"></wuug-nr-input>
-			</div>
+		const oscillatorControls = [
+			{
+				prefix: 'oscillatorOne',
+				label: 'Oscillator 1',
+			},
+			{
+				prefix: 'oscillatorTwo',
+				label: 'Oscillator 2',
+			},
+		];
 
-			<div class="oscillator-controls">
-				<wuug-nr-input data-variable="oscillatorTwo_PitchValue" min="-24" max="24" value="0" step="1" label="Oscillator 2 Pitch"></wuug-nr-input>
-				<wuug-nr-input data-variable="oscillatorTwo_FinePitchValue" min="-1" max="1" value="0" step="0.01" label="Fine pitch"></wuug-nr-input>
-				<wuug-nr-input data-variable="oscillatorTwo_S_Gain" min="0" max="1" value="0.5" step="0.01" label="Gain"></wuug-nr-input>
-				<wuug-nr-input data-variable="oscillatorTwo_Unstable" min="0" max="300" value="50" step="0.01" label="Unstable"></wuug-nr-input>
-			</div>
-		`;
+		const controlDefs = [
+			{ key: 'PitchValue', min: -24, max: 24, value: 0, step: 1, label: 'Pitch' },
+			{ key: 'FinePitchValue', min: -1, max: 1, value: 0, step: 0.01, label: 'Fine pitch' },
+			{ key: 'S_Gain', min: 0, max: 1, value: 0.5, step: 0.01, label: 'Gain' },
+			{ key: 'Unstable', min: 0, max: 300, value: 1, step: 0.01, label: 'Unstable' },
+		];
+
+		this.innerHTML = oscillatorControls
+			.map(
+				(osc) =>
+					`<div class="oscillator-controls">
+				${controlDefs.map((def) => `<wuug-nr-input data-variable="${osc.prefix}_${def.key}" min="${def.min}" max="${def.max}" value="${def.value}" step="${def.step}" label="${osc.label} ${def.label}"></wuug-nr-input>`).join('\n')}
+			</div>`
+			)
+			.join('\n');
 
 		this.heldNotes = new Set();
 		if (navigator.requestMIDIAccess) {
