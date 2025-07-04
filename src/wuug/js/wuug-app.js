@@ -109,7 +109,7 @@ class WuugApp extends HTMLElement {
 		this.waveShaperOscillators.oversample = '2x';
 
 		this.waveShaperFilter = this.audioCtx.createWaveShaper();
-		// Even softer tube distortion curve
+
 		const curve = new Float32Array(256);
 		for (let i = 0; i < 256; ++i) {
 			const x = (i / 255) * 2 - 1;

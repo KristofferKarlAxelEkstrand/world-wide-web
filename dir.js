@@ -42,7 +42,7 @@ const htmlContent = `
 	<body>
 		<header>
 			<img src="/img/www.png" alt="Let's share what we know - World Wide Web" />
-			<p>This is my personal playground for experimenting with front-end development. From animations to web technologies and APIs, it's a space where I tinker, test, and explore. If you enjoy diving into the nitty-gritty of web development and don't mind a bit of trial and error, you're in the right place. Let's figure out the web together.</p>
+			<p>This is my personal playground for experimenting with front-end development. From animations to web technologies and APIs, it's a space where I tinker, test, and explore. Think of it like demos for songs—some things are polished and ready to use, others are rough ideas or starting points. Sometimes you'll find something you can take straight as it is, and sometimes it's just a seed for what you can build. If you enjoy diving into the nitty-gritty of web development and don't mind a bit of trial and error, you're in the right place. Let's figure out the web together.</p>
 		</header>
 		<main>
 			<ul>${directories

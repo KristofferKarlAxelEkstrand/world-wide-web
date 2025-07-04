@@ -1,0 +1,153 @@
+html {
+	box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+	box-sizing: inherit;
+}
+
+body {
+	margin: 0;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	padding: 0;
+	padding: 1em;
+	min-height: 100vh;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+
+	@media (min-width: 500px) {
+		padding: 2em;
+	}
+}
+
+.cube-container {
+	position: relative;
+	perspective: 1000px;
+	margin: 2em auto;
+	width: 200px;
+	height: 200px;
+}
+
+.cube {
+	position: relative;
+	transform-style: preserve-3d;
+	animation: rotate 8s infinite linear;
+	width: 200px;
+	height: 200px;
+}
+
+.face {
+	display: flex;
+	position: absolute;
+	justify-content: center;
+	align-items: center;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	border-radius: 10px;
+	width: 200px;
+	height: 200px;
+	color: white;
+	font-weight: bold;
+	font-size: 24px;
+	text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.face.front {
+	transform: rotateY(0deg) translateZ(100px);
+	background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+}
+
+.face.back {
+	transform: rotateY(180deg) translateZ(100px);
+	background: linear-gradient(135deg, #4ecdc4, #44a08d);
+}
+
+.face.right {
+	transform: rotateY(90deg) translateZ(100px);
+	background: linear-gradient(135deg, #45b7d1, #96c93d);
+}
+
+.face.left {
+	transform: rotateY(-90deg) translateZ(100px);
+	background: linear-gradient(135deg, #f9ca24, #f0932b);
+}
+
+.face.top {
+	transform: rotateX(90deg) translateZ(100px);
+	background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+}
+
+.face.bottom {
+	transform: rotateX(-90deg) translateZ(100px);
+	background: linear-gradient(135deg, #fd79a8, #fdcb6e);
+}
+
+@keyframes rotate {
+	0% {
+		transform: rotateX(0deg) rotateY(0deg);
+	}
+	25% {
+		transform: rotateX(90deg) rotateY(90deg);
+	}
+	50% {
+		transform: rotateX(180deg) rotateY(180deg);
+	}
+	75% {
+		transform: rotateX(270deg) rotateY(270deg);
+	}
+	100% {
+		transform: rotateX(360deg) rotateY(360deg);
+	}
+}
+
+.cube:hover {
+	animation-play-state: paused;
+}
+
+.cube-container:hover .cube {
+	transform: rotateX(45deg) rotateY(45deg);
+	animation-play-state: paused;
+	transition: transform 0.3s ease;
+}
+
+@media (max-width: 768px) {
+	.cube-container {
+		width: 150px;
+		height: 150px;
+	}
+
+	.cube {
+		width: 150px;
+		height: 150px;
+	}
+
+	.face {
+		width: 150px;
+		height: 150px;
+		font-size: 18px;
+	}
+
+	.face.front {
+		transform: rotateY(0deg) translateZ(75px);
+	}
+
+	.face.back {
+		transform: rotateY(180deg) translateZ(75px);
+	}
+
+	.face.right {
+		transform: rotateY(90deg) translateZ(75px);
+	}
+
+	.face.left {
+		transform: rotateY(-90deg) translateZ(75px);
+	}
+
+	.face.top {
+		transform: rotateX(90deg) translateZ(75px);
+	}
+
+	.face.bottom {
+		transform: rotateX(-90deg) translateZ(75px);
+	}
+}
