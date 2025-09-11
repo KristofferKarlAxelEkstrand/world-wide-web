@@ -132,7 +132,7 @@ theremin-app > .theremin-xy-pad .note-matrix > div[data-note^='C'] {
 }
 theremin-app > .theremin-xy-pad .note-matrix > div[data-note^='C#'] {
 	background-color: #000000;
-	color: #000000;
+	color: #ffffff;
 	font-weight: bold;
 }
 theremin-app > .theremin-xy-pad .note-matrix > div[data-note^='D'] {
