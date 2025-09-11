@@ -1,61 +1,61 @@
 html {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 *,
 *:before,
 *:after {
-	box-sizing: inherit;
+  box-sizing: inherit;
 }
 
 body {
-	margin: 0;
-	background-color: #f4f4f4;
-	padding: 0;
-	padding: 3rem;
-	width: 100vw;
-	max-width: 100dvw;
-	height: 100vh;
-	max-height: 100dvh;
-	color: #333;
-	font-family: 'Roboto', sans-serif;
+  margin: 0;
+  background-color: #f4f4f4;
+  padding: 0;
+  padding: 3rem;
+  width: 100vw;
+  max-width: 100dvw;
+  height: 100vh;
+  max-height: 100dvh;
+  color: #333;
+  font-family: "Roboto", sans-serif;
 }
 
 synth-gui {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	max-width: 100%;
-	height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
 }
 synth-gui .key-bed {
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-	align-items: center;
-	gap: 0.25rem;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	border: 1px solid #ccc;
-	border-radius: 8px;
-	background-color: #fff;
-	padding: 1rem;
-	width: 100%;
-	height: 100%;
-	max-height: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  padding: 1rem;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
 }
 synth-gui .key-bed button {
-	flex-grow: 1;
-	border: none;
-	border-radius: 0.25rem;
-	height: 100%;
+  flex-grow: 1;
+  border: none;
+  border-radius: 0.25rem;
+  height: 100%;
 }
 synth-gui .key-bed button:nth-child(2),
 synth-gui .key-bed button:nth-child(4),
 synth-gui .key-bed button:nth-child(7),
 synth-gui .key-bed button:nth-child(9),
 synth-gui .key-bed button:nth-child(11) {
-	background-color: #9e9e9e;
-	color: #fff;
+  background-color: #9e9e9e;
+  color: #fff;
 }
