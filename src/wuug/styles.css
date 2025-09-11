@@ -132,7 +132,7 @@ wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='C'] {
 }
 wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='C#'] {
 	background-color: #000000;
-	color: #000000;
+	color: #ffffff;
 	font-weight: bold;
 }
 wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='D'] {
