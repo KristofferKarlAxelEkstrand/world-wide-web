@@ -53,8 +53,8 @@ button[popovertarget]:focus {
 }
 
 #notifications[popover] {
-	padding: 2rem;
 	position-area: bottom top left;
+	padding: 2rem;
 }
 
 #notifications[popover]:popover-open {
