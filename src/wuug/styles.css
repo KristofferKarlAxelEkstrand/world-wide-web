@@ -21,124 +21,198 @@ body {
 	font-family: 'Roboto', sans-serif;
 }
 
-section {
-	padding: 4em;
-}
-
-quantity-selector {
-	display: flex;
-	align-items: center;
-	border: 2px solid #000000;
-	border-radius: 0.2rem;
-}
-quantity-selector > button.quantity-decrease,
-quantity-selector > button.quantity-increase {
-	cursor: pointer;
-	border: none;
-	border-radius: 0;
-	background-color: #666666;
-	padding: 0.5em 1em;
-	color: #fff;
-}
-quantity-selector input {
-	display: inline;
-	flex-grow: 0;
-	box-sizing: border-box; /* Include padding and border in the element's total width */
-	border: none;
-	border-radius: 0;
-	background-color: #303030;
-	padding: 0.5em 0;
-	width: auto;
-	min-width: 1em;
-	max-width: 20em;
-	color: #bbbbbb;
-	text-align: center;
-}
-quantity-selector .add-to-cart {
-	flex-grow: 1;
-	cursor: pointer;
-	border: none;
-	border-radius: 0;
-	background-color: #000000;
-	padding: 0.5em 1em;
-	color: #fff;
-	text-align: left;
-	white-space: nowrap;
-}
-
-product-card-list {
-	display: grid;
-	gap: 1em;
-}
-product-card-list product-card {
+wuug-app {
 	display: flex;
 	flex-direction: column;
-	justify-content: start;
-	border-radius: 0.3em;
-	background-color: blueviolet;
+	gap: 2rem;
+	box-shadow:
+		inset 0 0 0.2rem rgba(0, 0, 0, 0.13),
+		inset 0 0 0.5rem rgba(0, 0, 0, 0.08);
+	border-radius: 0.5rem;
+	background-color: #f3f3f3;
+	padding: 2rem;
+	width: 100%;
+	height: 100vh;
+	max-height: 100dvh;
 	overflow: hidden;
 }
-product-card-list product-card > picture {
+wuug-app > .theremin-settings {
 	display: flex;
-	position: relative;
+	flex-direction: row;
+	gap: 1rem;
+}
+wuug-app > .theremin-settings > .theremin-settings-group {
+	display: flex;
+	flex-grow: 0;
+	flex-direction: column;
+	gap: 0.5rem;
+	border: 1px solid #d8d8d8;
+	border-radius: 0.5rem;
+	padding: 1rem;
+	width: 100%;
+	max-width: 20rem;
+}
+wuug-app > .theremin-settings > .theremin-settings-group > div {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.8rem;
+}
+wuug-app > .theremin-settings > .theremin-settings-group > div > div {
+	display: flex;
+	flex-grow: 1;
+	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	background-color: #c7c7c7;
-	padding-top: 100%;
-	width: 100%;
-	height: 0;
-	overflow: hidden;
+	gap: 0.5rem;
+	padding: 1rem;
+	width: 50%;
 }
-product-card-list product-card > picture > img {
-	position: absolute;
-	top: 0;
-	left: 0;
+wuug-app > .theremin-xy-pad {
+	position: relative;
+	cursor: crosshair;
+	border-radius: 0.5rem;
+	background-color: rgb(60, 64, 70);
 	width: 100%;
 	height: 100%;
-	object-fit: cover;
+	overflow: hidden;
 }
-product-card-list product-card > .content {
-	background-color: rgba(204, 216, 190, 0.7607843137);
-	padding: 1em;
-	color: #333;
+wuug-app > .theremin-xy-pad > .indicator {
+	display: flex;
+	position: absolute;
+	justify-content: center;
+	align-items: center;
+	transform: translate(-50%, -50%);
+	z-index: 20;
+	border: 2px solid rgba(255, 255, 255, 0.1450980392);
+	border-radius: 50%;
+	background: rgba(175, 175, 175, 0.068);
+	width: 4rem;
+	height: 4rem;
+	pointer-events: none;
 }
-product-card-list product-card > .content > h2 {
-	margin: 0;
-	font-size: 1em;
+wuug-app > .theremin-xy-pad > .indicator::after {
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	animation: vibrato-indicator var(--vibrato-duration, 0.5s) infinite linear;
+	border-radius: 50%;
+	background-color: #ffffff;
+	width: 0.5rem;
+	height: 0.5rem;
+	content: '';
 }
-product-card-list product-card > .content > p {
-	margin: 0;
-	font-size: 1em;
+wuug-app > .theremin-xy-pad .note-matrix {
+	display: flex;
+	gap: 0;
+	opacity: 0.02;
+	height: 100%;
+	pointer-events: none;
+	user-select: none;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div {
+	flex: 1;
+	flex-grow: 1;
+	box-shadow: inset 0 0 0 1px #000000;
+	border: none;
+	background-color: #f9f9f9;
+	padding: 0;
+	overflow: hidden;
+	pointer-events: none;
+	user-select: none;
+	text-align: center;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='C'] {
+	background-color: #ffffff;
+	color: #ffffff;
+	font-weight: bold;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='C#'] {
+	background-color: #000000;
+	color: #ffffff;
+	font-weight: bold;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='D'] {
+	background-color: #ffffff;
+	color: #ffffff;
+	font-weight: bold;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='D#'] {
+	background-color: #000000;
+	color: #000000;
+	font-weight: bold;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='E'] {
+	background-color: #ffffff;
+	color: #ffffff;
+	font-weight: bold;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='F'] {
+	background-color: #ffffff;
+	color: #ffffff;
+	font-weight: bold;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='F#'] {
+	background-color: #000000;
+	color: #000000;
+	font-weight: bold;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='G'] {
+	background-color: #ffffff;
+	color: #ffffff;
+	font-weight: bold;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='G#'] {
+	background-color: #000000;
+	color: #000000;
+	font-weight: bold;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='A'] {
+	background-color: #ffffff;
+	color: #ffffff;
+	font-weight: bold;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='A#'] {
+	background-color: #000000;
+	color: #000000;
+	font-weight: bold;
+}
+wuug-app > .theremin-xy-pad .note-matrix > div[data-note^='B'] {
+	background-color: #ffffff;
+	color: #ffffff;
+	font-weight: bold;
 }
 
-product-card-list {
-	display: grid;
-	grid-template-columns: repeat(1, 1fr);
-	gap: 1em;
-}
-
-@media (min-width: 650px) {
-	product-card-list {
-		grid-template-columns: repeat(2, 1fr);
+@keyframes vibrato-indicator {
+	0% {
+		transform: translate(var(--vibrato-amplitude-negative, 0px), -50%);
+	}
+	50% {
+		transform: translate(var(--vibrato-amplitude, 0px), -50%);
+	}
+	100% {
+		transform: translate(var(--vibrato-amplitude-negative, 0px), -50%);
 	}
 }
-@media (min-width: 900px) {
-	product-card-list {
-		grid-template-columns: repeat(3, 1fr);
-	}
+dial-knob {
+	display: inline-block;
+	vertical-align: middle;
+	width: 2rem;
+	height: 2rem;
 }
-@media (min-width: 1300px) {
-	product-card-list {
-		grid-template-columns: repeat(4, 1fr);
-	}
+dial-knob > svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+	touch-action: none;
+	user-select: none;
 }
-@media (min-width: 1500px) {
-	product-card-list {
-		grid-template-columns: repeat(5, 1fr);
-	}
+dial-knob > svg circle.svg-knob {
+	fill: rgb(37, 7, 30);
 }
-@media (min-width: 1700px) {
-	product-card-list {
-		grid-template-columns: repeat(6, 1fr);
-	}
+dial-knob > svg circle.svg-knob-dot {
+	fill: rgb(124, 102, 102);
 }
