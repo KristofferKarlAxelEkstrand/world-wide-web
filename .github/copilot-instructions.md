@@ -21,6 +21,7 @@ Run these commands in sequence to set up the development environment:
 - Generate main page: `npm run start-page` -- regenerates src/index.html from experiment directories in ~200ms.
 
 ### Build Times and Timeouts
+
 - **npm install**: ~8 seconds (fresh install). Set timeout to 60+ seconds.
 - **npm run build**: ~1.4 seconds. Set timeout to 30+ seconds.
 - **npm run format**: ~1.5 seconds. Set timeout to 30+ seconds.
