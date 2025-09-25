@@ -99,6 +99,13 @@ src/
 - No linting beyond Prettier exists in this project
 - ALWAYS run formatting before committing changes
 
+### File Management Best Practices
+
+- **Editing existing files**: Use `str_replace` for modifying existing files. NEVER use `create` on existing files as this causes data loss
+- **Build artifacts**: The `dist/` directory and `node_modules/` are automatically excluded via `.gitignore`
+- **Temporary files**: Create temporary files in `/tmp` directory to avoid accidental commits
+- **SCSS compilation**: SCSS files are compiled automatically during build - no need to manually compile
+
 ## Troubleshooting
 
 ### Common Issues and Solutions
@@ -123,6 +130,14 @@ src/
 - Hot reload works for all file changes during development
 - SCSS compilation is handled automatically by Vite during builds
 
+### Browser Compatibility and Testing
+
+- **Interactive experiments**: Many experiments use modern APIs (Web Audio, Canvas, etc.)
+- **Mobile support**: Test experiments on both desktop and mobile/touch devices
+- **Audio experiments**: Theremin and Wuug require user interaction to start audio (browser requirement)
+- **Canvas experiments**: Check performance with different screen sizes and pixel densities
+- **Feature detection**: Some experiments may require feature detection for older browsers
+
 ## Development Workflow Summary
 
 1. **Setup**: `npm install`
@@ -133,3 +148,7 @@ src/
 6. **Manual testing**: Always validate through browser interaction
 
 Remember: This project has no automated tests, so thorough manual validation through the browser is essential for every change.
+
+<tool_calling>
+You have the capability to call multiple tools in a single response. For maximum efficiency, whenever you need to perform multiple independent operations, ALWAYS invoke all relevant tools simultaneously rather than sequentially. Especially when exploring repository, reading files, viewing directories, validating changes or replying to comments.
+</tool_calling>
